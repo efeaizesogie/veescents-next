@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { X, Heart, ShoppingBag } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 
-const EXCHANGE_RATE = 1600;
+const EXCHANGE_RATE = 1;
 
 export default function WishlistPanel() {
   const { wishlist, isWishlistOpen, setIsWishlistOpen, toggleWishlist, addToCart } = useStore();

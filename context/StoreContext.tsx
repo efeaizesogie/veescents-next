@@ -8,6 +8,8 @@ interface StoreContextType {
   products: Product[];
   newCollection: Product[];
   galleryProducts: Product[];
+  bestSellers: Product[];
+  recommended: Product[];
   isLoading: boolean;
   error: string | null;
   cart: CartItem[];
@@ -129,8 +131,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [wishlist, userId, syncReady]);
 
-  const newCollection = products.filter(p => p.section === 'new_collection' || p.isNew);
-  const galleryProducts = products.filter(p => p.section === 'gallery' || (!p.isNew && !p.isNewProduct));
+  const newCollection = products.filter(p => p.section === 'new_collection' || p.isNew || p.isNewProduct);
+  const galleryProducts = products.filter(p => p.section === 'gallery');
+  const bestSellers = products.filter(p => (p as any).tags?.includes('best_seller')).sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0));
+  const recommended = products.filter(p => (p as any).tags?.includes('recommended'));
 
   const addToCart = useCallback((product: Product) => {
     setCart(prev => {
@@ -163,7 +167,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   return (
     <StoreContext.Provider value={{
-      products, newCollection, galleryProducts, isLoading, error,
+      products, newCollection, galleryProducts, bestSellers, recommended, isLoading, error,
       cart, wishlist, addToCart, removeFromCart, updateQuantity,
       toggleWishlist, isInWishlist, isCartOpen, setIsCartOpen,
       isWishlistOpen, setIsWishlistOpen, cartTotal, cartCount,

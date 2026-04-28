@@ -4,9 +4,10 @@ import Hero from '@/components/Hero';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import FeaturedCategories from '@/components/FeaturedCategories';
 import PromoCards from '@/components/PromoCards';
-import FeaturedBanner from '@/components/FeaturedBanner';
 import HomeProducts from '@/components/HomeProducts';
-import SmartSections from '@/components/SmartSections';
+import BestSellers from '@/components/BestSellers';
+import Recommendations from '@/components/Recommendations';
+import FeaturedBanner from '@/components/FeaturedBanner';
 import ContactSection from '@/components/ContactSection';
 
 export default function HomePage() {
@@ -15,12 +16,15 @@ export default function HomePage() {
       <AnnouncementBar />
       <Hero />
       <WhyChooseUs />
-      <FeaturedCategories />
+      <Suspense fallback={<div className="py-20 bg-white" />}>
+        <FeaturedCategories />
+      </Suspense>
       <PromoCards />
       <Suspense>
         <HomeProducts />
       </Suspense>
-      <SmartSections />
+      <BestSellers />
+      <Recommendations />
       <FeaturedBanner />
       <ContactSection />
     </>

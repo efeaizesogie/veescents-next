@@ -10,6 +10,7 @@ export interface IProduct extends Document {
   isNewProduct?: boolean;
   salesCount?: number;
   category: 'men' | 'women' | 'unisex';
+  collectionSlug?: string;
   section: 'new_collection' | 'gallery';
 }
 
@@ -24,8 +25,11 @@ const ProductSchema: Schema = new Schema({
   salesCount: { type: Number, default: 0 },
   inStock: { type: Boolean, default: true },
   cat: { type: String, enum: ['niche', 'gift_set', 'body_care', 'candles', 'deodorants', 'celebrity', 'perfume_oil', 'combo'], default: null },
+  collection: { type: String, default: null },
+  collectionSlug: { type: String, default: null },
+  tags: [{ type: String }],
   category: { type: String, enum: ['men', 'women', 'unisex'], required: true },
-  section: { type: String, enum: ['new_collection', 'gallery'], required: true },
+  section: { type: String, required: true },
 });
 
 export default mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);

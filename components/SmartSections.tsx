@@ -7,7 +7,7 @@ import { useStore } from '@/context/StoreContext';
 import ProductCard from './ProductCard';
 import SkeletonProductCard from './SkeletonProductCard';
 
-const EXCHANGE_RATE = 1600;
+const EXCHANGE_RATE = 1;
 
 const TABS = [
   { id: 'recommended', label: 'Recommended', icon: Sparkles },

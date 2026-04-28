@@ -10,8 +10,11 @@ export interface Product {
   inStock?: boolean;
   category: 'men' | 'women' | 'unisex';
   cat?: 'niche' | 'gift_set' | 'body_care' | 'candles' | 'deodorants' | 'celebrity' | 'perfume_oil' | 'combo';
-  section?: 'new_collection' | 'gallery';
+  collection?: string;
+  collectionSlug?: string;
+  section?: string;
   isNewProduct?: boolean;
+  tags?: string[];
 }
 
 export interface CartItem extends Product {
