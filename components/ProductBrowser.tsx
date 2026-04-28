@@ -6,35 +6,46 @@ import { ChevronDown } from 'lucide-react';
 import { Product } from '@/types';
 import ProductCard from './ProductCard';
 
-const CATEGORIES = [
-  { id: 'all', label: 'All' },
-  { id: 'women', label: 'Women' },
-  { id: 'men', label: 'Men' },
-  { id: 'unisex', label: 'Unisex' },
-];
+interface CategoryOption {
+  _id: string;
+  name: string;
+  slug: string;
+}
 
 export default function ProductBrowser({ products }: { products: Product[] }) {
   const searchParams = useSearchParams();
   const [visibleCount, setVisibleCount] = useState(8);
   const [sortOption, setSortOption] = useState('newest');
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [manualCategory, setManualCategory] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
 
   useEffect(() => {
-    const cat = searchParams.get('cat');
-    if (cat && CATEGORIES.some(c => c.id === cat)) setActiveCategory(cat);
-  }, [searchParams]);
+    fetch('/api/admin/categories')
+      .then(r => r.json())
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .catch(() => setCategories([]));
+  }, []);
+
+  const categoryOptions = useMemo(() => ([
+    { id: 'all', label: 'All' },
+    ...categories.map((cat) => ({ id: cat.slug, label: cat.name })),
+  ]), [categories]);
+
+  const categoryFromQuery = searchParams.get('cat');
+  const activeCategory = manualCategory
+    ?? (categoryFromQuery && categoryOptions.some(c => c.id === categoryFromQuery) ? categoryFromQuery : 'all');
 
   const handleCategoryChange = (catId: string) => {
     if (catId === activeCategory) return;
     setIsAnimating(true);
-    setActiveCategory(catId);
+    setManualCategory(catId);
     setVisibleCount(8);
     setTimeout(() => setIsAnimating(false), 300);
   };
 
   const processedProducts = useMemo(() => {
-    let result = activeCategory !== 'all' ? products.filter(p => p.category === activeCategory) : [...products];
+    const result = activeCategory !== 'all' ? products.filter(p => p.category === activeCategory) : [...products];
     if (sortOption === 'price-asc') result.sort((a, b) => a.price - b.price);
     else if (sortOption === 'price-desc') result.sort((a, b) => b.price - a.price);
     else if (sortOption === 'rating') result.sort((a, b) => b.rating - a.rating);
@@ -49,7 +60,7 @@ export default function ProductBrowser({ products }: { products: Product[] }) {
     <div className="w-full">
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-200 pb-4">
         <div className="flex flex-wrap gap-6 text-sm uppercase tracking-wider font-medium text-gray-400 mb-4 md:mb-0">
-          {CATEGORIES.map(cat => (
+          {categoryOptions.map(cat => (
             <button
               key={cat.id}
               onClick={() => handleCategoryChange(cat.id)}

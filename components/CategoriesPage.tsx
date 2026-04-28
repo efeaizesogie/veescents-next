@@ -1,79 +1,183 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import SectionTitle from './SectionTitle';
+import { useStore } from '@/context/StoreContext';
+import ProductCard from './ProductCard';
+import RecommendedPerfumes from './RecommendedPerfumes';
 
 interface Category {
   _id: string;
   name: string;
   slug: string;
   description: string;
+  image?: string;
 }
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  women: 'https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=1000&auto=format&fit=crop',
-  men: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1000&auto=format&fit=crop',
-  unisex: 'https://images.unsplash.com/photo-1512777576255-a876cea05f8e?q=80&w=1000&auto=format&fit=crop',
-};
+const PAGE_SIZE = 12;
 const FALLBACK = 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?q=80&w=1000&auto=format&fit=crop';
 
 export default function CategoriesPage() {
-  const router = useRouter();
+  const { products, isLoading, trackSearch } = useStore();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingCats, setLoadingCats] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('best_selling');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    fetch('/api/admin/categories')
-      .then(r => r.json())
-      .then(data => setCategories(Array.isArray(data) ? data : []))
-      .finally(() => setLoading(false));
+    fetch('/api/admin/categories', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .finally(() => setLoadingCats(false));
   }, []);
 
-  return (
-    <div className="pt-32 pb-20 bg-cream-50 min-h-screen">
-      <div className="container mx-auto px-6">
-        <SectionTitle title="Categories" subtitle="Discover fragrances by category" />
+  const categoryTabs = useMemo(() => ([
+    { _id: 'all', name: 'All', slug: 'all', description: 'All categories', image: '' },
+    ...categories,
+  ]), [categories]);
 
-        {loading ? (
-          <div className="grid gap-12">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-64 bg-white rounded-sm animate-pulse" />
-            ))}
+  const filtered = useMemo(() => {
+    let list = activeCategory === 'all'
+      ? [...products]
+      : products.filter((p) => p.category === activeCategory);
+
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+    }
+
+    if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
+    else if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+    else if (sort === 'rating') list.sort((a, b) => b.rating - a.rating);
+    else if (sort === 'newest') list.sort((a, b) => (a.isNewProduct === b.isNewProduct ? 0 : a.isNewProduct ? -1 : 1));
+    else list.sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0));
+
+    return list;
+  }, [products, activeCategory, search, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const visible = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const currentCategory = categoryTabs.find((c) => c.slug === activeCategory);
+
+  return (
+    <div className="page-shell bg-cream-50 min-h-screen">
+      <div className="container mx-auto px-6">
+        <SectionTitle title="Categories" subtitle="Browse by category with quick discovery tools." />
+
+        {loadingCats ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-28 rounded-sm bg-white animate-pulse" />)}
           </div>
         ) : (
-          <div className="grid gap-12">
-            {categories.map((cat, idx) => (
-              <div
-                key={cat._id}
-                className={`flex flex-col md:flex-row items-center gap-0 bg-white rounded-sm shadow-sm overflow-hidden cursor-pointer group ${idx % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
-                onClick={() => router.push(`/store?category=${cat.slug}`)}
-              >
-                <div className="w-full md:w-1/2 h-64 md:h-96 overflow-hidden relative">
-                  <Image
-                    src={CATEGORY_IMAGES[cat.slug] || FALLBACK}
-                    alt={cat.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
-                </div>
-                <div className="w-full md:w-1/2 text-center md:text-left p-8 md:px-14">
-                  <h3 className="font-serif text-4xl md:text-5xl text-accent-dark mb-4">{cat.name}</h3>
-                  <p className="text-gray-500 mb-8 max-w-md mx-auto md:mx-0">
-                    {cat.description || `Shop our ${cat.name.toLowerCase()} fragrance collection.`}
-                  </p>
-                  <button className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-accent-gold hover:text-accent-dark transition-colors">
-                    Shop {cat.name} <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+            {categoryTabs.map((cat) => {
+              const active = activeCategory === cat.slug;
+              return (
+                <button
+                  key={cat._id}
+                  onClick={() => { setActiveCategory(cat.slug); setPage(1); }}
+                  className={`relative h-28 overflow-hidden rounded-sm border text-left ${active ? 'border-accent-gold' : 'border-gray-100'} group`}
+                >
+                  {cat.image ? (
+                    <Image src={cat.image} alt={cat.name} fill className="object-cover" sizes="240px" />
+                  ) : (
+                    <Image src={FALLBACK} alt={cat.name} fill className="object-cover" sizes="240px" unoptimized />
+                  )}
+                  <div className={`absolute inset-0 ${active ? 'bg-black/35' : 'bg-black/50 group-hover:bg-black/40'} transition-colors`} />
+                  <div className="absolute inset-0 p-3 flex flex-col justify-end">
+                    <p className="text-white text-sm font-semibold">{cat.name}</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
+
+        <div className="bg-white p-4 rounded-sm shadow-sm mb-8 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+          <div>
+            <h2 className="font-serif text-2xl text-accent-dark">{currentCategory?.name || 'All'}</h2>
+            <p className="text-sm text-gray-600">{currentCategory?.description || 'Browse perfumes in this category.'}</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <div className="relative">
+              <input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                  trackSearch(e.target.value);
+                }}
+                placeholder="Search perfumes..."
+                className="pl-9 pr-8 py-2 border border-gray-200 rounded-sm text-sm w-full sm:w-64 focus:outline-none focus:border-accent-dark"
+              />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+            <select
+              value={sort}
+              onChange={(e) => { setSort(e.target.value); setPage(1); }}
+              className="px-3 py-2 border border-gray-200 rounded-sm text-sm focus:outline-none focus:border-accent-dark"
+            >
+              <option value="best_selling">Best Selling</option>
+              <option value="newest">New Arrivals</option>
+              <option value="rating">Top Rated</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => <div key={i} className="bg-white rounded-sm aspect-square animate-pulse" />)}
+          </div>
+        ) : visible.length === 0 ? (
+          <div className="text-center py-20 text-gray-400 bg-white rounded-sm border border-gray-100">
+            <p className="font-serif text-2xl mb-2">No perfumes found</p>
+            <p className="text-sm">Try another category or clear your search.</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {visible.map((product) => (
+                <div key={product.id} className="animate-fade-in">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex items-center justify-between">
+              <p className="text-xs text-gray-500">{filtered.length} products • Page {safePage} of {totalPages}</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage <= 1}
+                  className="px-3 py-2 text-xs font-bold uppercase tracking-widest border border-gray-300 rounded-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage >= totalPages}
+                  className="px-3 py-2 text-xs font-bold uppercase tracking-widest border border-gray-300 rounded-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        <RecommendedPerfumes searchTerm={search} category={activeCategory} excludeIds={visible.map((p) => p.id)} />
       </div>
     </div>
   );

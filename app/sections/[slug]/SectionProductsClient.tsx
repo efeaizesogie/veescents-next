@@ -5,18 +5,29 @@ import { useStore } from '@/context/StoreContext';
 import ProductCard from '@/components/ProductCard';
 import { Search, X, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import RecommendedPerfumes from '@/components/RecommendedPerfumes';
 
 interface Props {
   section: { name: string; slug: string; description?: string };
 }
 
 export default function SectionProductsClient({ section }: Props) {
-  const { products, isLoading } = useStore();
+  const { products, isLoading, trackSearch } = useStore();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('default');
 
   const filtered = useMemo(() => {
     let res = products.filter(p => p.section === section.slug);
+    if (section.slug === 'all_products') {
+      res = [...products];
+    } else if (section.slug === 'new_arrivals') {
+      res = products.filter(p => p.isNewProduct || p.isNew).sort((a, b) => b.id - a.id);
+    } else if (section.slug === 'best_sellers') {
+      res = [...products].sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0)).slice(0, 80);
+    } else if (res.length === 0) {
+      // Fallback for newly-created sections with no direct assignments yet.
+      res = [...products].sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0)).slice(0, 40);
+    }
     if (search) {
       const q = search.toLowerCase();
       res = res.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
@@ -39,7 +50,7 @@ export default function SectionProductsClient({ section }: Props) {
 
         <div className="mb-10">
           <p className="text-xs uppercase tracking-widest text-accent-gold font-medium mb-2">Section</p>
-          <h1 className="font-serif text-4xl md:text-5xl text-accent-dark">{section.name}</h1>
+          <h1 className="font-serif text-3xl md:text-4xl text-accent-dark">{section.name}</h1>
           {section.description && <p className="text-gray-400 mt-2 text-sm max-w-lg">{section.description}</p>}
         </div>
 
@@ -50,7 +61,7 @@ export default function SectionProductsClient({ section }: Props) {
               type="text"
               placeholder="Search by name or brand..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); trackSearch(e.target.value); }}
               className="pl-9 pr-4 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-accent-dark w-full text-sm"
             />
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -94,6 +105,8 @@ export default function SectionProductsClient({ section }: Props) {
             ))}
           </div>
         )}
+
+        <RecommendedPerfumes searchTerm={search} section={section.slug} excludeIds={filtered.map((p) => p.id)} />
       </div>
     </div>
   );

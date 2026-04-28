@@ -8,8 +8,8 @@ import { Product } from '@/types';
 import ProductCard from './ProductCard';
 import SectionTitle from './SectionTitle';
 
-const EXCHANGE_RATE = 1;
 const MAX_PRICE = 200000;
+const PAGE_SIZE = 12;
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
@@ -29,8 +29,6 @@ const CAT_TYPES = [
   { value: 'candles', label: 'Scented Candles' },
   { value: 'deodorants', label: 'Deodorants' },
 ];
-
-const SECTIONS: { value: string; label: string }[] = [];
 
 const BUDGET_PRESETS = [
   { label: 'Under ₦15k', max: 15000 },
@@ -97,6 +95,7 @@ export default function StorePage() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [activeBrands, setActiveBrands] = useState<string[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(searchParams.get('page') || '1')));
 
   const uniqueProducts = Array.from(new Map<number, Product>(products.map(p => [p.id, p])).values());
 
@@ -143,6 +142,14 @@ export default function StorePage() {
     activeBrands.length > 0,
     budgetPreset !== null || priceRange[0] > 0 || priceRange[1] < MAX_PRICE,
   ].filter(Boolean).length;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeCategory, activeCat, activeSection, activeCollection, sortOption, minRating, newOnly, inStockOnly, activeBrands, budgetPreset, priceRange]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedProducts = filteredProducts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const resetFilters = () => {
     setActiveCategory('all');
@@ -296,12 +303,12 @@ export default function StorePage() {
   );
 
   return (
-    <div className="pt-32 pb-20 bg-cream-50 min-h-screen">
+    <div className="page-shell bg-cream-50 min-h-screen">
       <div className="container mx-auto px-6">
         <SectionTitle title="Our Collection" subtitle="Luxury fragrance for every budget." />
 
         {/* Top bar */}
-        <div className="bg-white p-4 shadow-sm rounded-sm mb-8 flex flex-col sm:flex-row justify-between gap-4 items-center">
+        <div className="bg-white p-3.5 shadow-sm rounded-sm mb-6 border border-gray-100 flex flex-col sm:flex-row justify-between gap-3 items-center">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               className="lg:hidden flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-accent-dark border border-gray-200 px-3 py-2 rounded-sm hover:border-accent-gold transition-colors"
@@ -315,7 +322,7 @@ export default function StorePage() {
             <div className="relative flex-1 sm:flex-none">
               <input type="text" placeholder="Search by name or brand..."
                 value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-accent-dark w-full sm:w-72 text-sm" />
+                className="pl-9 pr-4 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-accent-dark w-full sm:w-72 text-sm text-gray-700" />
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               {searchTerm && (
                 <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
@@ -325,23 +332,23 @@ export default function StorePage() {
             </div>
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-            <span className="text-xs text-gray-400">{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}</span>
+            <span className="text-xs text-gray-500">{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}</span>
             <select value={sortOption} onChange={e => setSortOption(e.target.value)}
               className="px-3 py-2 border border-gray-200 rounded-sm focus:outline-none focus:border-accent-dark bg-white text-sm">
               <option value="default">Sort: Default</option>
               <option value="newest">New Arrivals</option>
               <option value="rating">Best Rated</option>
               <option value="best_selling">Best Selling</option>
-              <option value="price-asc">Price: Low → High</option>
-              <option value="price-desc">Price: High → Low</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
             </select>
           </div>
         </div>
 
-        <div className="flex gap-8 items-start">
+        <div className="flex gap-6 items-start">
           {/* Desktop sticky scrollable sidebar */}
-          <div className="hidden lg:block w-60 flex-shrink-0 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-sm">
-            <div className="bg-white p-5 shadow-sm rounded-sm">
+          <div className="hidden lg:block w-56 flex-shrink-0 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-sm">
+            <div className="bg-white p-4 shadow-sm rounded-sm border border-gray-100">
               <SidebarContent />
             </div>
           </div>
@@ -363,15 +370,15 @@ export default function StorePage() {
 
           {/* Product grid — scrolls independently */}
           <div className="flex-1 min-w-0">
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map(p => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+              {paginatedProducts.length > 0 ? (
+                paginatedProducts.map(p => (
                   <div key={p.id} className="animate-fade-in">
                     <ProductCard product={p} />
                   </div>
                 ))
               ) : (
-                <div className="col-span-full text-center py-24 text-gray-400">
+                <div className="col-span-full text-center py-20 text-gray-500">
                   <p className="font-serif text-2xl mb-2">No products found</p>
                   <p className="text-sm mb-4">Try adjusting your filters.</p>
                   <button onClick={resetFilters} className="text-xs font-bold uppercase tracking-widest text-accent-gold hover:underline">
@@ -380,6 +387,27 @@ export default function StorePage() {
                 </div>
               )}
             </div>
+            {filteredProducts.length > 0 && totalPages > 1 && (
+              <div className="flex items-center justify-between mt-8">
+                <p className="text-xs text-gray-500">Page {safePage} of {totalPages}</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={safePage <= 1}
+                    className="px-3 py-2 text-xs font-bold uppercase tracking-widest border border-gray-300 rounded-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={safePage >= totalPages}
+                    className="px-3 py-2 text-xs font-bold uppercase tracking-widest border border-gray-300 rounded-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

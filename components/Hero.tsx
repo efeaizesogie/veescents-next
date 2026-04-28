@@ -3,47 +3,89 @@ import Image from 'next/image';
 
 export default function Hero() {
   return (
-    <section id="home" className="relative pt-32 pb-20 overflow-hidden bg-cream-50">
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col md:flex-row items-center">
-          <div className="w-full md:w-1/2 relative flex justify-center items-center mb-16 md:mb-0">
-            <div className="absolute top-10 left-10 md:left-20 w-64 h-64 md:w-96 md:h-96 bg-accent-gold/20 rounded-full opacity-60 -z-10 translate-y-[-20%] translate-x-[-20%]" />
-            <div className="absolute top-0 right-10 w-4 h-4 bg-accent-gold rotate-45" />
-            <div className="absolute bottom-20 left-10 w-3 h-3 border border-accent-gold rotate-12" />
-            <div className="absolute top-1/2 right-1/4 w-3 h-3 bg-accent-gold/40 rounded-full" />
-            <div className="relative z-10 transform hover:-translate-y-2 transition-transform duration-700">
-              <div className="w-64 h-80 md:w-80 md:h-96 relative rounded-t-full overflow-hidden shadow-2xl shadow-accent-gold/20 border-2 border-accent-gold/30">
-                <Image
-                  src="https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=800&auto=format&fit=crop"
-                  alt="Luxury Perfume"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent pointer-events-none" />
+    <section id="home" className="relative pt-28 pb-12 bg-cream-50 border-b border-gray-100">
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+          <div>
+            <span className="text-accent-gold font-semibold tracking-[0.2em] text-[11px] uppercase mb-3 block">
+              Veescents Fragrance Store
+            </span>
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-[3.3rem] leading-tight text-accent-dark">
+              Shop Original Perfumes
+              <br />
+              For Every Budget
+            </h1>
+            <p className="text-gray-600 mt-4 max-w-xl text-sm md:text-base leading-relaxed">
+              Discover top-rated designer, Arabian, and everyday fragrances with fast delivery and carefully curated picks.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {['100% Authentic', 'Fast Delivery', 'Best Sellers Updated Daily'].map((item) => (
+                <span
+                  key={item}
+                  className="text-[11px] uppercase tracking-widest bg-white border border-gray-200 px-3 py-2 text-gray-500"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/store"
+                className="bg-accent-dark text-white px-7 py-3 text-xs font-bold uppercase tracking-widest hover:bg-accent-gold transition-colors"
+              >
+                Shop Now
+              </Link>
+              <Link
+                href="/collections"
+                className="border border-accent-dark text-accent-dark px-7 py-3 text-xs font-bold uppercase tracking-widest hover:bg-accent-dark hover:text-white transition-colors"
+              >
+                Explore Collections
+              </Link>
+            </div>
+
+            <div className="mt-7 grid grid-cols-3 gap-4 max-w-md">
+              <div>
+                <p className="font-serif text-2xl text-accent-dark">2k+</p>
+                <p className="text-[11px] uppercase tracking-widest text-gray-400">Orders Served</p>
               </div>
-              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-48 h-4 bg-accent-gold/20 blur-xl rounded-full" />
+              <div>
+                <p className="font-serif text-2xl text-accent-dark">150+</p>
+                <p className="text-[11px] uppercase tracking-widest text-gray-400">Product Picks</p>
+              </div>
+              <div>
+                <p className="font-serif text-2xl text-accent-dark">4.8</p>
+                <p className="text-[11px] uppercase tracking-widest text-gray-400">Average Rating</p>
+              </div>
             </div>
           </div>
 
-          <div className="w-full md:w-1/2 text-center md:text-left md:pl-12">
-            <span className="text-accent-gold/70 font-medium tracking-[0.3em] text-xs uppercase mb-4 block">
-              Luxury Fragrance Store
-            </span>
-            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-accent-dark leading-[1.15] mb-8">
-              Smell is a word <br />
-              <span className="text-accent-dark">Perfume is</span> <br />
-              <span className="italic text-accent-gold">Literature</span>
-            </h1>
-            <p className="text-gray-500 mb-10 max-w-md mx-auto md:mx-0 leading-relaxed">
-              Discover scents that tell your unique story. A curated collection of fragrances designed to evoke memories and emotions.
-            </p>
-            <Link
-              href="/#new-collection"
-              className="inline-block bg-accent-gold text-white px-10 py-4 rounded-sm hover:bg-accent-gold-dark transition-all duration-300 shadow-lg shadow-accent-gold/20 text-sm font-bold tracking-wider uppercase transform hover:translate-y-px"
-            >
-              Buy Now
-            </Link>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2 relative h-56 md:h-64 bg-white overflow-hidden border border-gray-200">
+              <Image
+                src="/products/original-designer-perfume.jpeg"
+                alt="Featured perfumes"
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/15 to-transparent" />
+              <div className="absolute left-4 bottom-4 text-white">
+                <p className="text-[10px] uppercase tracking-widest text-accent-gold">Featured Today</p>
+                <p className="font-serif text-2xl leading-tight">Original Designer</p>
+              </div>
+            </div>
+            <div className="relative h-36 md:h-40 bg-white overflow-hidden border border-gray-200">
+              <Image src="/products/arabian-luxury-perfume.webp" alt="Arabian luxury perfumes" fill className="object-cover" />
+              <div className="absolute inset-0 bg-black/30" />
+              <p className="absolute left-3 bottom-3 text-white text-xs uppercase tracking-widest font-semibold">Arabian Luxury</p>
+            </div>
+            <div className="relative h-36 md:h-40 bg-white overflow-hidden border border-gray-200">
+              <Image src="/products/perfume-oil.jpg" alt="Perfume oils" fill className="object-cover" />
+              <div className="absolute inset-0 bg-black/30" />
+              <p className="absolute left-3 bottom-3 text-white text-xs uppercase tracking-widest font-semibold">Perfume Oils</p>
+            </div>
           </div>
         </div>
       </div>

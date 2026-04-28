@@ -10,14 +10,14 @@ import { useStore } from '@/context/StoreContext';
 const EXCHANGE_RATE = 1;
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { addToCart, toggleWishlist, isInWishlist } = useStore();
+  const { addToCart, toggleWishlist, isInWishlist, trackProductView } = useStore();
   const router = useRouter();
   const isWishlisted = isInWishlist(product.id);
 
   return (
-    <div className="group flex flex-col items-center relative cursor-pointer" onClick={() => router.push(`/product/${product.id}`)}>
+    <div className="group flex flex-col items-center relative cursor-pointer" onClick={() => { trackProductView(product.id); router.push(`/product/${product.id}`); }}>
       <button
-        onClick={(e) => { e.stopPropagation(); toggleWishlist(product); }}
+        onClick={(e) => { e.stopPropagation(); trackProductView(product.id); toggleWishlist(product); }}
         className="absolute top-2 right-2 z-20 p-1.5 rounded-full bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white text-accent-gold shadow-sm transform translate-y-2 group-hover:translate-y-0"
         aria-label="Toggle Wishlist"
       >
@@ -47,7 +47,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="flex flex-col items-center gap-1.5">
         <span className="text-accent-gold font-semibold text-sm">₦{(product.price * EXCHANGE_RATE).toLocaleString()}</span>
         <button
-          onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+          onClick={(e) => { e.stopPropagation(); trackProductView(product.id); addToCart(product); }}
           className="text-[10px] font-bold uppercase border-b border-transparent hover:border-accent-dark text-gray-400 hover:text-accent-dark transition-all pb-0.5 active:scale-95"
         >
           Add to Cart

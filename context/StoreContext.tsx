@@ -25,12 +25,17 @@ interface StoreContextType {
   setIsWishlistOpen: (v: boolean) => void;
   cartTotal: number;
   cartCount: number;
+  recentlyViewedIds: number[];
+  recentSearches: string[];
+  trackProductView: (productId: number) => void;
+  trackSearch: (term: string) => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const CART_KEY = 'veescents_cart';
 const WISH_KEY = 'veescents_wishlist';
+const REC_KEY = 'veescents_reco_signals';
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
@@ -44,6 +49,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [syncReady, setSyncReady] = useState(false);
+  const [recentlyViewedIds, setRecentlyViewedIds] = useState<number[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   // Fetch products from DB
   useEffect(() => {
@@ -102,6 +109,23 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, userId, products.length]);
+
+  useEffect(() => {
+    const raw = localStorage.getItem(REC_KEY);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as { viewed?: number[]; searches?: string[] };
+      setRecentlyViewedIds(Array.isArray(parsed.viewed) ? parsed.viewed.slice(0, 24) : []);
+      setRecentSearches(Array.isArray(parsed.searches) ? parsed.searches.slice(0, 20) : []);
+    } catch {
+      setRecentlyViewedIds([]);
+      setRecentSearches([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(REC_KEY, JSON.stringify({ viewed: recentlyViewedIds, searches: recentSearches }));
+  }, [recentlyViewedIds, recentSearches]);
 
   // Persist cart
   useEffect(() => {
@@ -162,6 +186,16 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const isInWishlist = useCallback((productId: number) =>
     wishlist.some(i => i.id === productId), [wishlist]);
 
+  const trackProductView = useCallback((productId: number) => {
+    setRecentlyViewedIds(prev => [productId, ...prev.filter(id => id !== productId)].slice(0, 24));
+  }, []);
+
+  const trackSearch = useCallback((term: string) => {
+    const normalized = term.trim().toLowerCase();
+    if (normalized.length < 2) return;
+    setRecentSearches(prev => [normalized, ...prev.filter(t => t !== normalized)].slice(0, 20));
+  }, []);
+
   const cartTotal = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const cartCount = cart.reduce((t, i) => t + i.quantity, 0);
 
@@ -171,6 +205,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       cart, wishlist, addToCart, removeFromCart, updateQuantity,
       toggleWishlist, isInWishlist, isCartOpen, setIsCartOpen,
       isWishlistOpen, setIsWishlistOpen, cartTotal, cartCount,
+      recentlyViewedIds, recentSearches, trackProductView, trackSearch,
     }}>
       {children}
     </StoreContext.Provider>

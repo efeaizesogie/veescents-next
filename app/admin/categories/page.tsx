@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import ImagePickerField from '@/components/admin/ImagePickerField';
 
 interface Category {
   _id: string;
   name: string;
   slug: string;
   description: string;
+  image: string;
   order: number;
 }
 
-const EMPTY = { name: '', description: '', order: 0 };
+const EMPTY = { name: '', description: '', image: '', order: 0 };
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -25,7 +28,7 @@ export default function AdminCategoriesPage() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/categories');
+    const res = await fetch('/api/admin/categories', { cache: 'no-store' });
     const data = await res.json();
     setCategories(Array.isArray(data) ? data : []);
     setLoading(false);
@@ -40,7 +43,7 @@ export default function AdminCategoriesPage() {
   };
 
   const openEdit = (cat: Category) => {
-    setForm({ name: cat.name, description: cat.description || '', order: cat.order });
+    setForm({ name: cat.name, description: cat.description || '', image: cat.image || '', order: cat.order });
     setEditing(cat._id);
     setError('');
   };
@@ -114,6 +117,9 @@ export default function AdminCategoriesPage() {
               <input type="number" className={ic} value={form.order} onChange={e => setForm(f => ({ ...f, order: Number(e.target.value) }))} />
             </div>
           </div>
+          <div className="mb-4">
+            <ImagePickerField value={form.image} onChange={(value) => setForm(f => ({ ...f, image: value }))} />
+          </div>
           <div className="flex gap-3">
             <button onClick={save} disabled={saving}
               className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors disabled:opacity-50">
@@ -144,6 +150,7 @@ export default function AdminCategoriesPage() {
             <thead className="border-b border-gray-100">
               <tr className="text-xs uppercase tracking-widest text-gray-400">
                 <th className="text-left px-6 py-4">Name</th>
+                <th className="text-left px-6 py-4 hidden sm:table-cell">Image</th>
                 <th className="text-left px-6 py-4 hidden sm:table-cell">Slug</th>
                 <th className="text-left px-6 py-4 hidden md:table-cell">Description</th>
                 <th className="text-left px-6 py-4 hidden sm:table-cell">Order</th>
@@ -154,6 +161,13 @@ export default function AdminCategoriesPage() {
               {categories.map(cat => (
                 <tr key={cat._id} className={`hover:bg-cream-50 transition-colors ${editing === cat._id ? 'bg-accent-gold/5' : ''}`}>
                   <td className="px-6 py-4 font-medium text-accent-dark">{cat.name}</td>
+                  <td className="px-6 py-4 hidden sm:table-cell">
+                    <div className="relative w-12 h-12 bg-gray-100 rounded-sm overflow-hidden">
+                      {cat.image ? (
+                        <Image src={cat.image} alt={cat.name} fill className="object-cover" sizes="48px" />
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 hidden sm:table-cell">
                     <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500">{cat.slug}</code>
                   </td>

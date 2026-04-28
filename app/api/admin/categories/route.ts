@@ -9,9 +9,9 @@ function isAdmin(userId: string | null) {
 }
 
 const DEFAULTS = [
-  { name: 'Men', slug: 'men', description: 'Fragrances for men', order: 0 },
-  { name: 'Women', slug: 'women', description: 'Fragrances for women', order: 1 },
-  { name: 'Unisex', slug: 'unisex', description: 'Fragrances for everyone', order: 2 },
+  { name: 'Men', slug: 'men', description: 'Fragrances for men', image: '/products/armaf-club-de-nuit-intense-edt-105ml-for-men.jpg', order: 0 },
+  { name: 'Women', slug: 'women', description: 'Fragrances for women', image: '/products/afnan-rare-reef-edp-100ml.jpeg', order: 1 },
+  { name: 'Unisex', slug: 'unisex', description: 'Fragrances for everyone', image: '/products/original-designer-perfume.jpeg', order: 2 },
 ];
 
 export async function GET() {
@@ -31,11 +31,11 @@ export async function POST(req: NextRequest) {
   if (!isAdmin(userId)) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   try {
     await connectDB();
-    const { name, description, order } = await req.json();
+    const { name, description, image, order } = await req.json();
     const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    const cat = await Category.create({ name, slug, description: description || '', order: order ?? 0 });
+    const cat = await Category.create({ name, slug, description: description || '', image: image || '', order: order ?? 0 });
     return NextResponse.json(cat, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ message: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ message: err instanceof Error ? err.message : 'Failed to create category' }, { status: 500 });
   }
 }

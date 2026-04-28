@@ -18,6 +18,12 @@ interface Section {
   slug: string;
 }
 
+interface Collection {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
 const MEDIA_FILES = [
   'afnan-9pm-elixir-parfum-intense-100ml.jpg',
   'afnan-rare-reef-edp-100ml.jpeg',
@@ -56,20 +62,6 @@ const MEDIA_FILES = [
   'salvatore-ferragamo-spicy-leather-parfum-100ml.jpg',
 ];
 
-const COLLECTIONS = [
-  { value: '', label: '— None —' },
-  { value: 'original-designer-perfume', label: 'Original Designer Perfume' },
-  { value: 'arabian-luxury-perfume', label: 'Arabian Luxury Perfume' },
-  { value: 'arabian-perfume', label: 'Arabian Perfume' },
-  { value: 'perfume-oil', label: 'Perfume Oil' },
-  { value: 'body-spray', label: 'Body Spray' },
-  { value: 'body-mist', label: 'Body Mist' },
-  { value: 'perfume-gift-set', label: 'Perfume Gift Sets' },
-  { value: 'diffuser', label: 'Diffuser' },
-  { value: 'kiddies', label: 'Kiddies' },
-  { value: 'combo', label: 'Combos' },
-];
-
 const ALL_TAGS = ['best_seller', 'recommended', 'new_arrival', 'deal'];
 
 type FormData = Omit<Product, 'id' | 'isNew'> & { collection: string; tags: string[] };
@@ -85,6 +77,7 @@ export default function ProductForm({ product }: { product?: Product & { collect
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
 
   useEffect(() => {
     fetch('/api/admin/categories')
@@ -93,6 +86,9 @@ export default function ProductForm({ product }: { product?: Product & { collect
     fetch('/api/admin/sections')
       .then(r => r.json())
       .then(data => setSections(Array.isArray(data) ? data : []));
+    fetch('/api/admin/collections')
+      .then(r => r.json())
+      .then(data => setCollections(Array.isArray(data) ? data : []));
   }, []);
 
   const [form, setForm] = useState<FormData>(product ? {
@@ -106,7 +102,8 @@ export default function ProductForm({ product }: { product?: Product & { collect
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const set = (field: keyof FormData, value: any) => setForm(prev => ({ ...prev, [field]: value }));
+  const set = <K extends keyof FormData>(field: K, value: FormData[K]) =>
+    setForm(prev => ({ ...prev, [field]: value }));
 
   const toggleTag = (tag: string) =>
     set('tags', form.tags.includes(tag) ? form.tags.filter(t => t !== tag) : [...form.tags, tag]);
@@ -124,8 +121,8 @@ export default function ProductForm({ product }: { product?: Product & { collect
       if (!res.ok) throw new Error((await res.json()).message);
       router.push('/admin/products');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save product');
     } finally {
       setLoading(false);
     }
@@ -152,7 +149,7 @@ export default function ProductForm({ product }: { product?: Product & { collect
           </div>
 
           <div>
-            <label className={lc}>Price (₦)</label>
+            <label className={lc}>Price (NGN)</label>
             <input required type="number" min="0" className={ic} value={form.price} onChange={e => set('price', e.target.value)} />
           </div>
 
@@ -185,27 +182,30 @@ export default function ProductForm({ product }: { product?: Product & { collect
           <div>
             <label className={lc}>Collection</label>
             <select className={ic} value={form.collection} onChange={e => set('collection', e.target.value)}>
-              {COLLECTIONS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              <option value="">None</option>
+              {collections.map((collection) => (
+                <option key={collection._id} value={collection.slug}>{collection.name}</option>
+              ))}
             </select>
           </div>
 
           <div>
             <label className={lc}>Product Type</label>
             <select className={ic} value={form.cat ?? ''} onChange={e => set('cat', e.target.value || undefined)}>
-              <option value="">— None —</option>
+              <option value="">None</option>
               <option value="niche">Niche Perfume</option>
               <option value="perfume_oil">Perfume Oil</option>
               <option value="gift_set">Gift Set</option>
               <option value="combo">Combo</option>
               <option value="celebrity">Celebrity</option>
-              <option value="body_care">Body & Beauty</option>
+              <option value="body_care">Body and Beauty</option>
               <option value="candles">Scented Candles</option>
               <option value="deodorants">Deodorants</option>
             </select>
           </div>
 
           <div>
-            <label className={lc}>Rating (1–5)</label>
+            <label className={lc}>Rating (1-5)</label>
             <input required type="number" min="1" max="5" className={ic} value={form.rating} onChange={e => set('rating', e.target.value)} />
           </div>
 
@@ -214,7 +214,6 @@ export default function ProductForm({ product }: { product?: Product & { collect
             <input type="number" min="0" className={ic} value={form.salesCount ?? 0} onChange={e => set('salesCount', Number(e.target.value))} />
           </div>
 
-          {/* Tags */}
           <div className="col-span-2">
             <label className={lc}>Tags</label>
             <div className="flex flex-wrap gap-3">
@@ -227,7 +226,6 @@ export default function ProductForm({ product }: { product?: Product & { collect
             </div>
           </div>
 
-          {/* Checkboxes */}
           <div className="flex items-center gap-3">
             <input type="checkbox" id="inStock" checked={form.inStock ?? true} onChange={e => set('inStock', e.target.checked)} className="accent-accent-gold w-4 h-4" />
             <label htmlFor="inStock" className="text-sm text-gray-500">In Stock</label>
@@ -237,11 +235,8 @@ export default function ProductForm({ product }: { product?: Product & { collect
             <label htmlFor="isNew" className="text-sm text-gray-500">New Arrival</label>
           </div>
 
-          {/* Image */}
           <div className="col-span-2">
             <label className={lc}>Product Image</label>
-
-            {/* Upload new file */}
             <label className="flex items-center gap-2 cursor-pointer mb-3 w-fit border border-dashed border-gray-300 hover:border-accent-gold px-4 py-2 rounded-sm text-sm text-gray-500 hover:text-accent-gold transition-colors">
               <Upload size={14} />
               Upload new image
@@ -263,7 +258,6 @@ export default function ProductForm({ product }: { product?: Product & { collect
               />
             </label>
 
-            {/* Media picker grid */}
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-52 overflow-y-auto border border-gray-100 rounded-sm p-2 bg-gray-50">
               {MEDIA_FILES.map((file) => {
                 const path = `/products/${file}`;

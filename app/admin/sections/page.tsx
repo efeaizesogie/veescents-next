@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import ImagePickerField from '@/components/admin/ImagePickerField';
 
 interface Section {
   _id: string;
   name: string;
   slug: string;
   description: string;
+  image: string;
   order: number;
 }
 
-const EMPTY = { name: '', description: '', order: 0 };
+const EMPTY = { name: '', description: '', image: '', order: 0 };
 
 export default function AdminSectionsPage() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -23,7 +26,7 @@ export default function AdminSectionsPage() {
 
   const load = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/sections');
+    const res = await fetch('/api/admin/sections', { cache: 'no-store' });
     const data = await res.json();
     setSections(Array.isArray(data) ? data : []);
     setLoading(false);
@@ -32,7 +35,7 @@ export default function AdminSectionsPage() {
   useEffect(() => { load(); }, []);
 
   const openNew = () => { setForm(EMPTY); setEditing('new'); setError(''); };
-  const openEdit = (s: Section) => { setForm({ name: s.name, description: s.description || '', order: s.order }); setEditing(s._id); setError(''); };
+  const openEdit = (s: Section) => { setForm({ name: s.name, description: s.description || '', image: s.image || '', order: s.order }); setEditing(s._id); setError(''); };
   const cancel = () => { setEditing(null); setError(''); };
 
   const save = async () => {
@@ -95,6 +98,9 @@ export default function AdminSectionsPage() {
               <input type="number" className={ic} value={form.order} onChange={e => setForm(f => ({ ...f, order: Number(e.target.value) }))} />
             </div>
           </div>
+          <div className="mb-4">
+            <ImagePickerField value={form.image} onChange={(value) => setForm(f => ({ ...f, image: value }))} />
+          </div>
           <div className="flex gap-3">
             <button onClick={save} disabled={saving}
               className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors disabled:opacity-50">
@@ -124,6 +130,7 @@ export default function AdminSectionsPage() {
             <thead className="border-b border-gray-100">
               <tr className="text-xs uppercase tracking-widest text-gray-400">
                 <th className="text-left px-6 py-4">Name</th>
+                <th className="text-left px-6 py-4 hidden sm:table-cell">Image</th>
                 <th className="text-left px-6 py-4 hidden sm:table-cell">Slug</th>
                 <th className="text-left px-6 py-4 hidden md:table-cell">Description</th>
                 <th className="text-left px-6 py-4 hidden sm:table-cell">Order</th>
@@ -134,6 +141,13 @@ export default function AdminSectionsPage() {
               {sections.map(s => (
                 <tr key={s._id} className={`hover:bg-cream-50 transition-colors ${editing === s._id ? 'bg-accent-gold/5' : ''}`}>
                   <td className="px-6 py-4 font-medium text-accent-dark">{s.name}</td>
+                  <td className="px-6 py-4 hidden sm:table-cell">
+                    <div className="relative w-12 h-12 bg-gray-100 rounded-sm overflow-hidden">
+                      {s.image ? (
+                        <Image src={s.image} alt={s.name} fill className="object-cover" sizes="48px" />
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 hidden sm:table-cell">
                     <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500">{s.slug}</code>
                   </td>

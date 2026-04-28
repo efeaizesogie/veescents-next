@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import ImagePickerField from './ImagePickerField';
 
 interface CollectionData {
   name: string;
@@ -20,7 +20,7 @@ export default function CollectionForm({ collection }: { collection?: Collection
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const set = (field: keyof CollectionData, value: any) => setForm(prev => ({ ...prev, [field]: value }));
+  const set = <K extends keyof CollectionData>(field: K, value: CollectionData[K]) => setForm(prev => ({ ...prev, [field]: value }));
 
   const autoSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -37,8 +37,8 @@ export default function CollectionForm({ collection }: { collection?: Collection
       if (!res.ok) throw new Error((await res.json()).message);
       router.push('/admin/collections');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save collection');
     } finally {
       setLoading(false);
     }
@@ -80,14 +80,7 @@ export default function CollectionForm({ collection }: { collection?: Collection
           </div>
 
           <div className="col-span-2">
-            <label className={lc}>Image Path or URL</label>
-            <input required className={ic} value={form.image} onChange={e => set('image', e.target.value)}
-              placeholder="/products/arabian-luxury-perfume.webp" />
-            {form.image && (
-              <div className="mt-3 relative w-32 h-24 bg-gray-100 rounded-sm overflow-hidden">
-                <Image src={form.image} alt="preview" fill className="object-cover" sizes="128px" />
-              </div>
-            )}
+            <ImagePickerField value={form.image} onChange={(value) => set('image', value)} />
           </div>
 
         </div>

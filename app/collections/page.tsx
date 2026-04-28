@@ -3,6 +3,7 @@ import Collection from '@/lib/models/Collection';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import RecommendedPerfumes from '@/components/RecommendedPerfumes';
 
 async function getCollections() {
   await connectDB();
@@ -15,13 +16,13 @@ export default async function CollectionsPage() {
   const collections = await getCollections();
 
   return (
-    <div className="pt-28 pb-20 bg-cream-50 min-h-screen">
+    <div className="page-shell bg-cream-50 min-h-screen">
       <div className="container mx-auto px-6">
 
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <span className="text-xs font-bold uppercase tracking-[0.3em] text-accent-gold mb-3 block">Browse</span>
-          <h1 className="font-serif text-5xl text-accent-dark mb-4">Our Collections</h1>
+          <h1 className="font-serif text-3xl md:text-4xl text-accent-dark mb-3">Our Collections</h1>
           <p className="text-gray-500 max-w-xl mx-auto leading-relaxed">
             Explore our curated range of fragrances, body care, and home scents — something for every mood and occasion.
           </p>
@@ -32,7 +33,7 @@ export default async function CollectionsPage() {
           <Link
             key={col.slug}
             href={`/store?collection=${col.slug}`}
-            className="group relative overflow-hidden block w-full h-[400px] mb-3"
+            className="group relative overflow-hidden block w-full h-[340px] mb-3"
           >
             <Image
               src={col.image}
@@ -44,9 +45,9 @@ export default async function CollectionsPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
             <div className="absolute inset-0 border-2 border-accent-gold/0 group-hover:border-accent-gold/50 transition-all duration-500" />
-            <div className="absolute bottom-0 left-0 p-10">
+            <div className="absolute bottom-0 left-0 p-6 md:p-8">
               <span className="text-accent-gold text-xs uppercase tracking-[0.3em] font-bold mb-2 block">Featured Collection</span>
-              <h2 className="font-serif text-5xl text-white mb-4">{col.name}</h2>
+              <h2 className="font-serif text-3xl md:text-4xl text-white mb-3">{col.name}</h2>
               <p className="text-white/70 text-sm mb-6 max-w-md">{col.description}</p>
               <span className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white border-b border-accent-gold pb-0.5 group-hover:gap-4 transition-all">
                 Shop Now <ArrowRight size={15} />
@@ -82,6 +83,8 @@ export default async function CollectionsPage() {
             </Link>
           ))}
         </div>
+
+        <RecommendedPerfumes />
 
       </div>
     </div>

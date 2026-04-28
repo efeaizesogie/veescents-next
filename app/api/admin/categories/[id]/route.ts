@@ -15,8 +15,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await connectDB();
     const { id } = await params;
     const body = await req.json();
-    if (body.name) body.slug = body.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    const cat = await Category.findByIdAndUpdate(id, body, { new: true });
+    const update: Record<string, unknown> = {
+      description: body.description || '',
+      image: body.image || '',
+      order: Number(body.order ?? 0),
+    };
+    if (body.name) {
+      update.name = body.name;
+      update.slug = String(body.name).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    }
+    const cat = await Category.findByIdAndUpdate(id, update, { new: true, runValidators: true });
     if (!cat) return NextResponse.json({ message: 'Not found' }, { status: 404 });
     return NextResponse.json(cat);
   } catch (err: any) {

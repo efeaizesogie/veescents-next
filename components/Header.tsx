@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import {
   Search,
   Heart,
@@ -30,13 +29,22 @@ const NAV_LINKS = [
     href: "/collections",
     hasDropdown: true,
     dropdownItems: [
-      { label: "Original Designer Perfume", href: "/store?collection=original-designer-perfume" },
-      { label: "Arabian Luxury Perfume", href: "/store?collection=arabian-luxury-perfume" },
+      {
+        label: "Original Designer Perfume",
+        href: "/store?collection=original-designer-perfume",
+      },
+      {
+        label: "Arabian Luxury Perfume",
+        href: "/store?collection=arabian-luxury-perfume",
+      },
       { label: "Arabian Perfume", href: "/store?collection=arabian-perfume" },
       { label: "Perfume Oil", href: "/store?collection=perfume-oil" },
       { label: "Body Spray", href: "/store?collection=body-spray" },
       { label: "Body Mist", href: "/store?collection=body-mist" },
-      { label: "Perfume Gift Sets", href: "/store?collection=perfume-gift-set" },
+      {
+        label: "Perfume Gift Sets",
+        href: "/store?collection=perfume-gift-set",
+      },
       { label: "Diffuser", href: "/store?collection=diffuser" },
       { label: "Kiddies", href: "/store?collection=kiddies" },
       { label: "Combos", href: "/store?collection=combo" },
@@ -53,11 +61,13 @@ const NAV_LINKS = [
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [sectionItems, setSectionItems] = useState<{ label: string; href: string }[]>([]);
+  const [sectionItems, setSectionItems] = useState<
+    { label: string; href: string }[]
+  >([]);
   const { cartCount, wishlist, setIsCartOpen, setIsWishlistOpen } = useStore();
-  const pathname = usePathname();
   const { user } = useUser();
   const adminIds = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || "")
     .split(",")
@@ -65,14 +75,21 @@ export default function Header() {
   const isAdmin = user && adminIds.includes(user.id);
 
   useEffect(() => {
-    fetch('/api/admin/sections')
-      .then(r => r.json())
-      .then(data => {
+    fetch("/api/admin/sections", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
         if (Array.isArray(data)) {
-          setSectionItems(data.map((s: { name: string; slug: string }) => ({
-            label: s.name,
-            href: `/sections/${s.slug}`,
-          })));
+          setSectionItems(
+            data.map((s: { name: string; slug: string }) => {
+              if (s.slug === "all_products")
+                return { label: s.name, href: "/store" };
+              if (s.slug === "new_arrivals")
+                return { label: s.name, href: "/store?sort=newest" };
+              if (s.slug === "best_sellers")
+                return { label: s.name, href: "/store?sort=best_selling" };
+              return { label: s.name, href: `/store?section=${s.slug}` };
+            })
+          );
         }
       });
   }, []);
@@ -84,24 +101,29 @@ export default function Header() {
       href: "/sections",
       hasDropdown: true,
       dropdownItems: [
-        { label: "All Products", href: "/store" },
-        { label: "New Arrivals", href: "/store?sort=newest" },
-        { label: "Best Sellers", href: "/store?sort=best_selling" },
-        ...sectionItems,
+        ...sectionItems.slice(0, 5),
+        { label: "View All Sections", href: "/sections" },
       ],
     },
     ...NAV_LINKS.slice(2),
   ];
+
+  const normalizedNavLinks = navLinks.map((link) => {
+    if (link.label !== "Collections") return link;
+    return {
+      ...link,
+      dropdownItems: [
+        ...link.dropdownItems.slice(0, 5),
+        { label: "View All Collections", href: "/collections" },
+      ],
+    };
+  });
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
 
   return (
     <>
@@ -128,7 +150,7 @@ export default function Header() {
           </div>
 
           <nav className="hidden lg:flex items-center justify-center flex-1 space-x-8">
-            {navLinks.map((link) => (
+            {normalizedNavLinks.map((link) => (
               <div
                 key={link.label}
                 className="relative group"
@@ -235,36 +257,70 @@ export default function Header() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-accent-gold/20 py-4 px-6 flex flex-col space-y-2 max-h-[80vh] overflow-y-auto">
-            {navLinks.map((link) => (
-              <div key={link.label}>
-                <Link
-                  href={link.href}
-                  className="block text-accent-dark hover:text-accent-gold font-medium py-2 border-b border-gray-50"
-                >
-                  {link.label}
-                </Link>
-                {link.dropdownItems.length > 0 && (
-                  <div className="pl-4 py-2 space-y-2 bg-cream-100">
-                    {link.dropdownItems.map((item) => (
-                      <Link
-                        key={item.label}
-                        href={item.href}
-                        className="block text-sm text-gray-500 hover:text-accent-gold py-0.5"
+          <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-accent-gold/20 py-3 px-4 flex flex-col space-y-2 max-h-[80vh] overflow-y-auto">
+            {normalizedNavLinks.map((link) => {
+              const hasItems = link.dropdownItems.length > 0;
+              const isOpen = mobileExpanded === link.label;
+              return (
+                <div key={link.label} className="border-b border-gray-100 pb-1">
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href={link.href}
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setMobileExpanded(null);
+                      }}
+                      className="block text-accent-dark hover:text-accent-gold font-semibold py-2 text-sm"
+                    >
+                      {link.label}
+                    </Link>
+                    {hasItems && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setMobileExpanded((prev) =>
+                            prev === link.label ? null : link.label
+                          )
+                        }
+                        className="p-2 text-gray-400 hover:text-accent-gold"
+                        aria-label={`Toggle ${link.label} submenu`}
+                        aria-expanded={isOpen}
                       >
-                        {item.label}
-                      </Link>
-                    ))}
+                        <ChevronDown
+                          size={16}
+                          className={`transition-transform ${
+                            isOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+                  {hasItems && isOpen && (
+                    <div className="pl-2 pr-1 pb-2 space-y-1">
+                      {link.dropdownItems.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            setMobileExpanded(null);
+                          }}
+                          className="block text-sm text-gray-600 hover:text-accent-gold py-1.5"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
             <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {!user && (
                   <SignInButton mode="modal">
-                    <button className="text-sm font-medium text-accent-dark hover:text-accent-gold transition-colors">
+                    <button className="text-sm font-semibold text-accent-dark hover:text-accent-gold transition-colors">
                       Sign In
                     </button>
                   </SignInButton>
