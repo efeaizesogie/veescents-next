@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Plus, Pencil } from 'lucide-react';
 import DeleteProductButton from '@/components/admin/DeleteProductButton';
 
+export const dynamic = 'force-dynamic';
+
 async function getProducts() {
   await connectDB();
   return Product.find().sort({ id: -1 }).lean();
@@ -15,21 +17,21 @@ export default async function AdminProductsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-serif text-4xl text-accent-dark">Products</h1>
+          <h1 className="font-serif text-3xl md:text-4xl text-accent-dark">Products</h1>
           <p className="text-gray-400 text-sm mt-1">{products.length} total products</p>
         </div>
         <Link
           href="/admin/products/new"
-          className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors"
+          className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors w-fit"
         >
           <Plus size={16} /> Add Product
         </Link>
       </div>
 
-      <div className="bg-white rounded-sm shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-sm shadow-sm border border-gray-100 overflow-x-auto">
+        <table className="w-full text-sm min-w-[480px]">
           <thead className="border-b border-gray-100">
             <tr className="text-xs uppercase tracking-widest text-gray-400">
               <th className="text-left px-6 py-4">Product</th>

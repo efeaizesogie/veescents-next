@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 
-const EXCHANGE_RATE = 1600;
+const EXCHANGE_RATE = 1;
 
 export default function CartPanel() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal } = useStore();

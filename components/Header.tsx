@@ -20,32 +20,26 @@ import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 const NAV_LINKS = [
   { label: "Home", href: "/", hasDropdown: false, dropdownItems: [] },
   {
-    label: "Products",
-    href: "/store",
-    hasDropdown: true,
-    dropdownItems: [
-      { label: "All Products", href: "/store" },
-      { label: "New Arrivals", href: "/store?sort=newest" },
-      { label: "Best Sellers", href: "/store?sort=rating" },
-      { label: "Deals", href: "/store?section=deals" },
-      { label: "Niche Perfumes", href: "/store?cat=niche" },
-      { label: "Gift Sets", href: "/store?cat=gift_set" },
-    ],
-  },
-  {
     label: "Categories",
     href: "/categories",
+    hasDropdown: false,
+    dropdownItems: [],
+  },
+  {
+    label: "Collections",
+    href: "/collections",
     hasDropdown: true,
     dropdownItems: [
-      { label: "Women", href: "/store?category=women" },
-      { label: "Men", href: "/store?category=men" },
-      { label: "Unisex", href: "/store?category=unisex" },
-      { label: "Niche Perfumes", href: "/store?cat=niche" },
-      { label: "Gift Sets", href: "/store?cat=gift_set" },
-      { label: "Body & Beauty Care", href: "/store?cat=body_care" },
-      { label: "Scented Candles", href: "/store?cat=candles" },
-      { label: "Deodorants", href: "/store?cat=deodorants" },
-      { label: "Celebrity Fragrances", href: "/store?cat=celebrity" },
+      { label: "Original Designer Perfume", href: "/store?collection=original-designer-perfume" },
+      { label: "Arabian Luxury Perfume", href: "/store?collection=arabian-luxury-perfume" },
+      { label: "Arabian Perfume", href: "/store?collection=arabian-perfume" },
+      { label: "Perfume Oil", href: "/store?collection=perfume-oil" },
+      { label: "Body Spray", href: "/store?collection=body-spray" },
+      { label: "Body Mist", href: "/store?collection=body-mist" },
+      { label: "Perfume Gift Sets", href: "/store?collection=perfume-gift-set" },
+      { label: "Diffuser", href: "/store?collection=diffuser" },
+      { label: "Kiddies", href: "/store?collection=kiddies" },
+      { label: "Combos", href: "/store?collection=combo" },
     ],
   },
   {
@@ -61,6 +55,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [sectionItems, setSectionItems] = useState<{ label: string; href: string }[]>([]);
   const { cartCount, wishlist, setIsCartOpen, setIsWishlistOpen } = useStore();
   const pathname = usePathname();
   const { user } = useUser();
@@ -68,6 +63,35 @@ export default function Header() {
     .split(",")
     .map((id) => id.trim());
   const isAdmin = user && adminIds.includes(user.id);
+
+  useEffect(() => {
+    fetch('/api/admin/sections')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSectionItems(data.map((s: { name: string; slug: string }) => ({
+            label: s.name,
+            href: `/sections/${s.slug}`,
+          })));
+        }
+      });
+  }, []);
+
+  const navLinks = [
+    ...NAV_LINKS.slice(0, 2),
+    {
+      label: "Sections",
+      href: "/sections",
+      hasDropdown: true,
+      dropdownItems: [
+        { label: "All Products", href: "/store" },
+        { label: "New Arrivals", href: "/store?sort=newest" },
+        { label: "Best Sellers", href: "/store?sort=best_selling" },
+        ...sectionItems,
+      ],
+    },
+    ...NAV_LINKS.slice(2),
+  ];
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -104,7 +128,7 @@ export default function Header() {
           </div>
 
           <nav className="hidden lg:flex items-center justify-center flex-1 space-x-8">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <div
                 key={link.label}
                 className="relative group"
@@ -127,7 +151,7 @@ export default function Header() {
                   link.dropdownItems.length > 0 && (
                     <div
                       className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 animate-fade-in ${
-                        link.label === "Categories" ? "w-56" : "w-52"
+                        link.label === "Collections" ? "w-64" : "w-52"
                       }`}
                     >
                       <div className="bg-white shadow-xl rounded-sm py-2 border-t-2 border-accent-gold">
@@ -212,7 +236,7 @@ export default function Header() {
 
         {isMobileMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-accent-gold/20 py-4 px-6 flex flex-col space-y-2 max-h-[80vh] overflow-y-auto">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <div key={link.label}>
                 <Link
                   href={link.href}
@@ -235,6 +259,27 @@ export default function Header() {
                 )}
               </div>
             ))}
+
+            <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {!user && (
+                  <SignInButton mode="modal">
+                    <button className="text-sm font-medium text-accent-dark hover:text-accent-gold transition-colors">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                )}
+                {user && isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-1 text-sm font-medium text-accent-dark hover:text-accent-gold transition-colors"
+                  >
+                    <LayoutDashboard size={16} /> Admin Panel
+                  </Link>
+                )}
+              </div>
+              {user && <UserButton />}
+            </div>
           </div>
         )}
       </header>

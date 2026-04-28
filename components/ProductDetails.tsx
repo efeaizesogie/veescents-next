@@ -8,7 +8,7 @@ import { ArrowLeft, Star, Truck, Shield, RefreshCw } from 'lucide-react';
 import { useStore } from '@/context/StoreContext';
 import ProductCard from './ProductCard';
 
-const EXCHANGE_RATE = 1600;
+const EXCHANGE_RATE = 1;
 
 export default function ProductDetails({ id }: { id: number }) {
   const { products, addToCart } = useStore();

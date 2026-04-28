@@ -77,7 +77,7 @@ export default function ProductBrowser({ products }: { products: Product[] }) {
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 min-h-[500px] transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 min-h-[500px] transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
         {currentProducts.length > 0 ? (
           currentProducts.map(product => (
             <div key={product.id} className="animate-fade-in">
