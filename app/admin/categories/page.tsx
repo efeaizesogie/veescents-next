@@ -84,18 +84,45 @@ export default function AdminCategoriesPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
+          <h1 className="font-serif text-3xl md:text-4xl text-accent-dark">Categories</h1>
+          <p className="text-gray-400 text-sm mt-1">{categories.length} categories</p>
           <h1 className="font-serif text-3xl md:text-4xl text-accent-dark">Categories</h1>
           <p className="text-gray-400 text-sm mt-1">{categories.length} categories</p>
         </div>
         <button
           onClick={openNew}
           className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors w-fit"
+        <button
+          onClick={openNew}
+          className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors w-fit"
         >
+          <Plus size={16} /> Add Category
+        </button>
           <Plus size={16} /> Add Category
         </button>
       </div>
 
+      {/* Add / Edit inline form */}
+      {editing !== null && (
+        <div className="bg-white border border-accent-gold/30 rounded-sm shadow-sm p-6 mb-6">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">
+            {editing === 'new' ? 'New Category' : 'Edit Category'}
+          </h2>
+          {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div className="sm:col-span-1">
+              <label className="block text-xs uppercase tracking-widest text-gray-400 mb-1">Name *</label>
+              <input className={ic} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Niche Perfumes" />
+            </div>
+            <div className="sm:col-span-1">
+              <label className="block text-xs uppercase tracking-widest text-gray-400 mb-1">Description</label>
+              <input className={ic} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optional description" />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-widest text-gray-400 mb-1">Order</label>
+              <input type="number" className={ic} value={form.order} onChange={e => setForm(f => ({ ...f, order: Number(e.target.value) }))} />
       {/* Add / Edit inline form */}
       {editing !== null && (
         <div className="bg-white border border-accent-gold/30 rounded-sm shadow-sm p-6 mb-6">

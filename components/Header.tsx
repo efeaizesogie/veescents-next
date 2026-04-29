@@ -27,6 +27,12 @@ const NAV_LINKS = [
   {
     label: "Collections",
     href: "/collections",
+    hasDropdown: false,
+    dropdownItems: [],
+  },
+  {
+    label: "Collections",
+    href: "/collections",
     hasDropdown: true,
     dropdownItems: [
       {
@@ -173,6 +179,7 @@ export default function Header() {
                   link.dropdownItems.length > 0 && (
                     <div
                       className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 animate-fade-in ${
+                        link.label === "Collections" ? "w-64" : "w-52"
                         link.label === "Collections" ? "w-64" : "w-52"
                       }`}
                     >

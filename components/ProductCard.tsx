@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { Heart } from 'lucide-react';
-import { Product } from '@/types';
-import { useStore } from '@/context/StoreContext';
+import React from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Heart } from "lucide-react";
+import { Product } from "@/types";
+import { useStore } from "@/context/StoreContext";
 
+const EXCHANGE_RATE = 1;
 const EXCHANGE_RATE = 1;
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -25,16 +26,20 @@ export default function ProductCard({ product }: { product: Product }) {
       </button>
 
       <div className="relative w-full aspect-square bg-white mb-3 overflow-hidden rounded-sm border border-gray-100">
+      <div className="relative w-full aspect-square bg-white mb-3 overflow-hidden rounded-sm border border-gray-100">
         <Image
           src={product.image}
           alt={product.name}
           fill
           className="object-contain object-center transform group-hover:scale-105 transition-transform duration-700 ease-out p-2"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          className="object-contain object-center transform group-hover:scale-105 transition-transform duration-700 ease-out p-2"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
         />
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
 
+      <div className="flex gap-0.5 mb-1">
       <div className="flex gap-0.5 mb-1">
         {[...Array(5)].map((_, i) => (
           <span key={i} className={`text-[10px] ${i < product.rating ? 'text-accent-gold' : 'text-gray-300'}`}>★</span>

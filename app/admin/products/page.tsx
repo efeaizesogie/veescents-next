@@ -122,12 +122,14 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-serif text-3xl md:text-4xl text-accent-dark">Products</h1>
           <p className="text-gray-400 text-sm mt-1">{total} matching products</p>
         </div>
         <Link
           href="/admin/products/new"
+          className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors w-fit"
           className="flex items-center gap-2 bg-accent-gold text-white px-5 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-accent-dark transition-colors w-fit"
         >
           <Plus size={16} /> Add Product
@@ -190,7 +192,13 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-4">
                     <div className="relative w-12 h-12 bg-gray-100 rounded-sm overflow-hidden flex-shrink-0">
-                      <Image src={p.image} alt={p.name} fill className="object-cover" sizes="48px" />
+                      <Image
+                        src={p.image}
+                        alt={p.name}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
                     </div>
                     <div>
                       <p className="font-medium text-accent-dark">{p.name}</p>
@@ -204,7 +212,10 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                 <td className="px-6 py-4 text-accent-gold font-medium">NGN {Number(p.price || 0).toLocaleString()}</td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-3">
-                    <Link href={`/admin/products/${p.id}`} className="p-2 hover:text-accent-gold transition-colors text-gray-400">
+                    <Link
+                      href={`/admin/products/${p.id}`}
+                      className="p-2 hover:text-accent-gold transition-colors text-gray-400"
+                    >
                       <Pencil size={16} />
                     </Link>
                     <DeleteProductButton productId={p.id} />
