@@ -212,7 +212,7 @@ export default function ProductForm({
               min="0"
               className={ic}
               value={form.price}
-              onChange={(e) => set("price", e.target.value)}
+              onChange={(e) => set("price", Number(e.target.value))}
             />
           </div>
 
@@ -221,7 +221,9 @@ export default function ProductForm({
             <select
               className={ic}
               value={form.category}
-              onChange={(e) => set("category", e.target.value)}
+              onChange={(e) =>
+                set("category", e.target.value as "men" | "women" | "unisex")
+              }
             >
               {categories.length === 0 ? (
                 <option value="">Loading...</option>
@@ -275,7 +277,21 @@ export default function ProductForm({
             <select
               className={ic}
               value={form.cat ?? ""}
-              onChange={(e) => set("cat", e.target.value || undefined)}
+              onChange={(e) =>
+                set(
+                  "cat",
+                  (e.target.value as
+                    | "niche"
+                    | "gift_set"
+                    | "body_care"
+                    | "candles"
+                    | "deodorants"
+                    | "celebrity"
+                    | "perfume_oil"
+                    | "combo"
+                    | undefined) || undefined
+                )
+              }
             >
               <option value="">None</option>
               <option value="niche">Niche Perfume</option>
@@ -298,7 +314,7 @@ export default function ProductForm({
               max="5"
               className={ic}
               value={form.rating}
-              onChange={(e) => set("rating", e.target.value)}
+              onChange={(e) => set("rating", Number(e.target.value))}
             />
           </div>
 

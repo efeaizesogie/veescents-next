@@ -128,7 +128,7 @@ export default function CollectionForm({
               min="0"
               className={ic}
               value={form.order}
-              onChange={(e) => set("order", e.target.value)}
+              onChange={(e) => set("order", Number(e.target.value))}
             />
           </div>
 
