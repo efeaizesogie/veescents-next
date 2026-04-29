@@ -20,19 +20,7 @@ export default function HomeProducts() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    fetch("/api/admin/sections", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => setSections(Array.isArray(data) ? data : []))
-      .catch(() => setSections([]));
-  }, []);
-
-  const newCollectionSectionName =
-    sections.find((s) => s.slug === "new_collection")?.name || "New Collection";
-  const gallerySectionName =
-    sections.find((s) => s.slug === "gallery")?.name || "Our Store";
-
-  useEffect(() => {
-    fetch("/api/admin/sections", { cache: "no-store" })
+    fetch("/api/admin/sections")
       .then((r) => r.json())
       .then((data) => setSections(Array.isArray(data) ? data : []))
       .catch(() => setSections([]));

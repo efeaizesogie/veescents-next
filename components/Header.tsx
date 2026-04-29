@@ -180,7 +180,6 @@ export default function Header() {
                     <div
                       className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 animate-fade-in ${
                         link.label === "Collections" ? "w-64" : "w-52"
-                        link.label === "Collections" ? "w-64" : "w-52"
                       }`}
                     >
                       <div className="bg-white shadow-xl rounded-sm py-2 border-t-2 border-accent-gold">
