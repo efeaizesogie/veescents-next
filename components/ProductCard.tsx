@@ -49,8 +49,6 @@ export default function ProductCard({ product }: { product: Product }) {
           fill
           className="object-contain object-center transform group-hover:scale-105 transition-transform duration-700 ease-out p-2"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-          className="object-contain object-center transform group-hover:scale-105 transition-transform duration-700 ease-out p-2"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
         />
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
