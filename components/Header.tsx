@@ -137,7 +137,7 @@ export default function Header() {
         onMouseLeave={() => setActiveDropdown(null)}
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
-          <div className="w-1/4">
+          <div className="">
             <Link href="/" className="block">
               <Image
                 src="/logo.png"

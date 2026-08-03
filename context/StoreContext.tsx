@@ -62,29 +62,50 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       .finally(() => setIsLoading(false));
   }, []);
 
-  // Load cart + wishlist once auth is resolved
+  // Reset syncReady when user status changes to prevent race condition updates
   useEffect(() => {
-    if (!isLoaded) return;
+    setSyncReady(false);
+  }, [userId]);
+
+  // Load cart + wishlist once auth and products are resolved
+  useEffect(() => {
+    if (!isLoaded || isLoading) return;
 
     if (userId) {
+      console.log('[StoreContext] Fetching cart and wishlist from DB for user', userId);
       // Logged in — load from DB
       Promise.all([
-        fetch('/api/user/cart').then(r => r.json()),
-        fetch('/api/user/wishlist').then(r => r.json()),
+        fetch('/api/user/cart').then(r => {
+          if (!r.ok) throw new Error(`Cart retrieval HTTP error ${r.status}`);
+          return r.json();
+        }),
+        fetch('/api/user/wishlist').then(r => {
+          if (!r.ok) throw new Error(`Wishlist retrieval HTTP error ${r.status}`);
+          return r.json();
+        }),
       ]).then(([cartData, wishData]) => {
+        console.log('[StoreContext] Successfully loaded from DB:', { cartData, wishData });
+        
         // Merge guest localStorage cart into DB cart
         const guestCart: CartItem[] = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
         const guestWish: Product[] = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
+
+        console.log('[StoreContext] Merging guest items:', { guestCart, guestWish });
 
         const dbItems: CartItem[] = (cartData.items || []).map((i: { productId: number; quantity: number }) => {
           const p = products.find(x => x.id === i.productId);
           return p ? { ...p, quantity: i.quantity } : null;
         }).filter(Boolean);
 
-        // Merge: guest items not already in DB cart
+        // Merge: guest items combined with DB cart (sum quantities for duplicates)
         const merged = [...dbItems];
         for (const g of guestCart) {
-          if (!merged.find(m => m.id === g.id)) merged.push(g);
+          const existing = merged.find(m => m.id === g.id);
+          if (existing) {
+            existing.quantity = existing.quantity + g.quantity;
+          } else {
+            merged.push(g);
+          }
         }
 
         const dbWishIds: number[] = wishData.productIds || [];
@@ -94,22 +115,49 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           if (!mergedWish.find(m => m.id === g.id)) mergedWish.push(g);
         }
 
+        console.log('[StoreContext] Merged results to set state:', { merged, mergedWish });
+
         setCart(merged);
         setWishlist(mergedWish);
         localStorage.removeItem(CART_KEY);
         localStorage.removeItem(WISH_KEY);
         setSyncReady(true);
+      }).catch(err => {
+        console.error('[StoreContext] Error merging cart/wishlist databases:', err);
+        // Fallback to guest localStorage items to prevent page freezes
+        try {
+          const savedCart = localStorage.getItem(CART_KEY);
+          const savedWish = localStorage.getItem(WISH_KEY);
+          if (savedCart) setCart(JSON.parse(savedCart));
+          if (savedWish) setWishlist(JSON.parse(savedWish));
+        } catch (e) {
+          console.error('[StoreContext] LocalStorage recovery failed:', e);
+        }
+        setSyncReady(true);
       });
     } else {
       // Guest — load from localStorage
+      console.log('[StoreContext] Loading cart & wishlist from localStorage session for guest user');
       const savedCart = localStorage.getItem(CART_KEY);
       const savedWish = localStorage.getItem(WISH_KEY);
-      if (savedCart) setCart(JSON.parse(savedCart));
-      if (savedWish) setWishlist(JSON.parse(savedWish));
+      if (savedCart) {
+        try {
+          setCart(JSON.parse(savedCart));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (savedWish) {
+        try {
+          setWishlist(JSON.parse(savedWish));
+        } catch (e) {
+          console.error(e);
+        }
+      }
       setSyncReady(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, userId, products.length]);
+  }, [isLoaded, userId, isLoading, products.length]);
 
   useEffect(() => {
     const raw = localStorage.getItem(REC_KEY);
@@ -132,12 +180,19 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     if (!syncReady) return;
     if (userId) {
+      const itemsToSync = cart.map(i => ({ productId: i.id, quantity: i.quantity }));
+      console.log('[StoreContext] Syncing cart to DB:', itemsToSync);
       fetch('/api/user/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cart.map(i => ({ productId: i.id, quantity: i.quantity })) }),
+        body: JSON.stringify({ items: itemsToSync }),
+      }).then(res => {
+        if (!res.ok) console.error('[StoreContext] DB cart sync failed status:', res.status);
+      }).catch(err => {
+        console.error('[StoreContext] DB cart sync network error:', err);
       });
     } else {
+      console.log('[StoreContext] Saving cart to localStorage session:', cart);
       localStorage.setItem(CART_KEY, JSON.stringify(cart));
     }
   }, [cart, userId, syncReady]);
@@ -146,12 +201,19 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     if (!syncReady) return;
     if (userId) {
+      const prodIds = wishlist.map(p => p.id);
+      console.log('[StoreContext] Syncing wishlist to DB:', prodIds);
       fetch('/api/user/wishlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productIds: wishlist.map(p => p.id) }),
+        body: JSON.stringify({ productIds: prodIds }),
+      }).then(res => {
+        if (!res.ok) console.error('[StoreContext] DB wishlist sync failed status:', res.status);
+      }).catch(err => {
+        console.error('[StoreContext] DB wishlist sync network error:', err);
       });
     } else {
+      console.log('[StoreContext] Saving wishlist to localStorage session:', wishlist);
       localStorage.setItem(WISH_KEY, JSON.stringify(wishlist));
     }
   }, [wishlist, userId, syncReady]);

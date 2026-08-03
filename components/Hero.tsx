@@ -7,9 +7,6 @@ export default function Hero() {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           <div>
-            <span className="text-accent-gold font-bold tracking-[0.25em] text-xs uppercase mb-4 block">
-              Veescents Fragrance Store
-            </span>
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-normal leading-tight text-accent-dark">
               Shop <span className="font-serif italic font-normal text-accent-gold-dark">Original Perfumes</span>
               <br />
@@ -45,7 +42,7 @@ export default function Hero() {
               </Link>
             </div>
 
-            <div className="mt-8 grid grid-cols-3 gap-4 max-w-md">
+            {/* <div className="mt-8 grid grid-cols-3 gap-4 max-w-md">
               <div>
                 <p className="font-serif text-3xl font-normal text-accent-dark">2k+</p>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-accent-gray mt-1 block">Orders Served</p>
@@ -58,7 +55,7 @@ export default function Hero() {
                 <p className="font-serif text-3xl font-normal text-accent-dark">4.8</p>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-accent-gray mt-1 block">Average Rating</p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
