@@ -68,106 +68,56 @@ function FilterSection({ title, children, defaultOpen = true }: { title: string;
   );
 }
 
-export default function StorePage() {
-  const searchParams = useSearchParams();
-  const { products } = useStore();
-  const [dbSections, setDbSections] = useState<{ value: string; label: string }[]>([]);
+interface SidebarContentProps {
+  activeFilterCount: number;
+  resetFilters: () => void;
+  newOnly: boolean;
+  setNewOnly: (v: boolean) => void;
+  inStockOnly: boolean;
+  setInStockOnly: (v: boolean) => void;
+  activeCategory: string;
+  setActiveCategory: (v: string) => void;
+  activeCat: string;
+  setActiveCat: (v: string) => void;
+  activeSection: string;
+  setActiveSection: (v: string) => void;
+  dbSections: { value: string; label: string }[];
+  budgetPreset: number | null;
+  setBudgetPreset: (v: number | null) => void;
+  priceRange: [number, number];
+  setPriceRange: (v: [number, number]) => void;
+  minRating: number;
+  setMinRating: (v: number) => void;
+  allBrands: string[];
+  activeBrands: string[];
+  toggleBrand: (brand: string) => void;
+}
 
-  useEffect(() => {
-    fetch('/api/admin/sections')
-      .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data))
-          setDbSections([{ value: 'all', label: 'All' }, ...data.map((s: any) => ({ value: s.slug, label: s.name }))]);
-      });
-  }, []);
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
-  const [activeCat, setActiveCat] = useState(searchParams.get('cat') || 'all');
-  const [activeSection, setActiveSection] = useState(searchParams.get('section') || 'all');
-  const [activeCollection, setActiveCollection] = useState(searchParams.get('collection') || 'all');
-  const [sortOption, setSortOption] = useState(searchParams.get('sort') || 'default');
-  const [minRating, setMinRating] = useState(0);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, MAX_PRICE]);
-  const [budgetPreset, setBudgetPreset] = useState<number | null>(null);
-  const [newOnly, setNewOnly] = useState(false);
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [activeBrands, setActiveBrands] = useState<string[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(searchParams.get('page') || '1')));
-
-  const uniqueProducts = Array.from(new Map<number, Product>(products.map(p => [p.id, p])).values());
-
-  const allBrands = useMemo(() =>
-    [...new Set(uniqueProducts.map(p => p.brand))].sort(),
-    [uniqueProducts]
-  );
-
-  const effectiveMaxPrice = budgetPreset ?? priceRange[1];
-  const effectiveMinPrice = budgetPreset ? 0 : priceRange[0];
-
-  const filteredProducts = useMemo(() => {
-    let result = uniqueProducts;
-    if (searchTerm) {
-      const lower = searchTerm.toLowerCase();
-      result = result.filter(p => p.name.toLowerCase().includes(lower) || p.brand.toLowerCase().includes(lower));
-    }
-    if (activeCategory !== 'all') result = result.filter(p => p.category === activeCategory);
-    if (activeCat !== 'all') result = result.filter(p => p.cat === activeCat);
-    if (activeSection !== 'all') result = result.filter(p => p.section === activeSection);
-    if (activeCollection !== 'all') result = result.filter(p => (p as any).collectionSlug === activeCollection || (p as any).collection === activeCollection);
-    if (minRating > 0) result = result.filter(p => p.rating >= minRating);
-    if (newOnly) result = result.filter(p => p.isNew || p.isNewProduct);
-    if (inStockOnly) result = result.filter(p => p.inStock !== false);
-    if (activeBrands.length > 0) result = result.filter(p => activeBrands.includes(p.brand));
-    result = result.filter(p => p.price >= effectiveMinPrice && p.price <= effectiveMaxPrice);
-    const res = [...result];
-    if (sortOption === 'price-asc') res.sort((a, b) => a.price - b.price);
-    else if (sortOption === 'price-desc') res.sort((a, b) => b.price - a.price);
-    else if (sortOption === 'rating') res.sort((a, b) => b.rating - a.rating);
-    else if (sortOption === 'newest') res.sort((a, b) => (a.isNew === b.isNew ? 0 : a.isNew ? -1 : 1));
-    else if (sortOption === 'best_selling') res.sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0));
-    return res;
-  }, [uniqueProducts, searchTerm, activeCategory, activeCat, activeSection, activeCollection, sortOption, minRating, newOnly, inStockOnly, activeBrands, effectiveMinPrice, effectiveMaxPrice]);
-
-  const activeFilterCount = [
-    activeCategory !== 'all',
-    activeCat !== 'all',
-    activeSection !== 'all',
-    activeCollection !== 'all',
-    minRating > 0,
-    newOnly,
-    inStockOnly,
-    activeBrands.length > 0,
-    budgetPreset !== null || priceRange[0] > 0 || priceRange[1] < MAX_PRICE,
-  ].filter(Boolean).length;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, activeCategory, activeCat, activeSection, activeCollection, sortOption, minRating, newOnly, inStockOnly, activeBrands, budgetPreset, priceRange]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
-  const safePage = Math.min(currentPage, totalPages);
-  const paginatedProducts = filteredProducts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
-
-  const resetFilters = () => {
-    setActiveCategory('all');
-    setActiveCat('all');
-    setActiveSection('all');
-    setActiveCollection('all');
-    setMinRating(0);
-    setPriceRange([0, MAX_PRICE]);
-    setBudgetPreset(null);
-    setNewOnly(false);
-    setInStockOnly(false);
-    setActiveBrands([]);
-  };
-
-  const toggleBrand = (brand: string) =>
-    setActiveBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
-
-  const SidebarContent = () => (
+function SidebarContent({
+  activeFilterCount,
+  resetFilters,
+  newOnly,
+  setNewOnly,
+  inStockOnly,
+  setInStockOnly,
+  activeCategory,
+  setActiveCategory,
+  activeCat,
+  setActiveCat,
+  activeSection,
+  setActiveSection,
+  dbSections,
+  budgetPreset,
+  setBudgetPreset,
+  priceRange,
+  setPriceRange,
+  minRating,
+  setMinRating,
+  allBrands,
+  activeBrands,
+  toggleBrand,
+}: SidebarContentProps) {
+  return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-lg text-accent-dark">Filters</h3>
@@ -301,6 +251,106 @@ export default function StorePage() {
       )}
     </div>
   );
+}
+
+export default function StorePage() {
+  const searchParams = useSearchParams();
+  const { products } = useStore();
+  const [dbSections, setDbSections] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/sections')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data))
+          setDbSections([{ value: 'all', label: 'All' }, ...data.map((s: any) => ({ value: s.slug, label: s.name }))]);
+      });
+  }, []);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState(searchParams.get('category') || 'all');
+  const [activeCat, setActiveCat] = useState(searchParams.get('cat') || 'all');
+  const [activeSection, setActiveSection] = useState(searchParams.get('section') || 'all');
+  const [activeCollection, setActiveCollection] = useState(searchParams.get('collection') || 'all');
+  const [sortOption, setSortOption] = useState(searchParams.get('sort') || 'default');
+  const [minRating, setMinRating] = useState(0);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, MAX_PRICE]);
+  const [budgetPreset, setBudgetPreset] = useState<number | null>(null);
+  const [newOnly, setNewOnly] = useState(false);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [activeBrands, setActiveBrands] = useState<string[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(Math.max(1, Number(searchParams.get('page') || '1')));
+
+  const uniqueProducts = Array.from(new Map<number, Product>(products.map(p => [p.id, p])).values());
+
+  const allBrands = useMemo(() =>
+    [...new Set(uniqueProducts.map(p => p.brand))].sort(),
+    [uniqueProducts]
+  );
+
+  const effectiveMaxPrice = budgetPreset ?? priceRange[1];
+  const effectiveMinPrice = budgetPreset ? 0 : priceRange[0];
+
+  const filteredProducts = useMemo(() => {
+    let result = uniqueProducts;
+    if (searchTerm) {
+      const lower = searchTerm.toLowerCase();
+      result = result.filter(p => p.name.toLowerCase().includes(lower) || p.brand.toLowerCase().includes(lower));
+    }
+    if (activeCategory !== 'all') result = result.filter(p => p.category === activeCategory);
+    if (activeCat !== 'all') result = result.filter(p => p.cat === activeCat);
+    if (activeSection !== 'all') result = result.filter(p => p.section === activeSection);
+    if (activeCollection !== 'all') result = result.filter(p => (p as any).collectionSlug === activeCollection || (p as any).collection === activeCollection);
+    if (minRating > 0) result = result.filter(p => p.rating >= minRating);
+    if (newOnly) result = result.filter(p => p.isNew || p.isNewProduct);
+    if (inStockOnly) result = result.filter(p => p.inStock !== false);
+    if (activeBrands.length > 0) result = result.filter(p => activeBrands.includes(p.brand));
+    result = result.filter(p => p.price >= effectiveMinPrice && p.price <= effectiveMaxPrice);
+    const res = [...result];
+    if (sortOption === 'price-asc') res.sort((a, b) => a.price - b.price);
+    else if (sortOption === 'price-desc') res.sort((a, b) => b.price - a.price);
+    else if (sortOption === 'rating') res.sort((a, b) => b.rating - a.rating);
+    else if (sortOption === 'newest') res.sort((a, b) => (a.isNew === b.isNew ? 0 : a.isNew ? -1 : 1));
+    else if (sortOption === 'best_selling') res.sort((a, b) => (b.salesCount ?? 0) - (a.salesCount ?? 0));
+    return res;
+  }, [uniqueProducts, searchTerm, activeCategory, activeCat, activeSection, activeCollection, sortOption, minRating, newOnly, inStockOnly, activeBrands, effectiveMinPrice, effectiveMaxPrice]);
+
+  const activeFilterCount = [
+    activeCategory !== 'all',
+    activeCat !== 'all',
+    activeSection !== 'all',
+    activeCollection !== 'all',
+    minRating > 0,
+    newOnly,
+    inStockOnly,
+    activeBrands.length > 0,
+    budgetPreset !== null || priceRange[0] > 0 || priceRange[1] < MAX_PRICE,
+  ].filter(Boolean).length;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeCategory, activeCat, activeSection, activeCollection, sortOption, minRating, newOnly, inStockOnly, activeBrands, budgetPreset, priceRange]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedProducts = filteredProducts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const resetFilters = () => {
+    setActiveCategory('all');
+    setActiveCat('all');
+    setActiveSection('all');
+    setActiveCollection('all');
+    setMinRating(0);
+    setPriceRange([0, MAX_PRICE]);
+    setBudgetPreset(null);
+    setNewOnly(false);
+    setInStockOnly(false);
+    setActiveBrands([]);
+  };
+
+  const toggleBrand = (brand: string) =>
+    setActiveBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
 
   return (
     <div className="page-shell bg-cream-50 min-h-screen">
@@ -349,7 +399,30 @@ export default function StorePage() {
           {/* Desktop sticky scrollable sidebar */}
           <div className="hidden lg:block w-56 flex-shrink-0 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-sm">
             <div className="bg-white p-4 shadow-sm rounded-sm border border-gray-100">
-              <SidebarContent />
+              <SidebarContent
+                activeFilterCount={activeFilterCount}
+                resetFilters={resetFilters}
+                newOnly={newOnly}
+                setNewOnly={setNewOnly}
+                inStockOnly={inStockOnly}
+                setInStockOnly={setInStockOnly}
+                activeCategory={activeCategory}
+                setActiveCategory={setActiveCategory}
+                activeCat={activeCat}
+                setActiveCat={setActiveCat}
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+                dbSections={dbSections}
+                budgetPreset={budgetPreset}
+                setBudgetPreset={setBudgetPreset}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                minRating={minRating}
+                setMinRating={setMinRating}
+                allBrands={allBrands}
+                activeBrands={activeBrands}
+                toggleBrand={toggleBrand}
+              />
             </div>
           </div>
 
@@ -362,7 +435,30 @@ export default function StorePage() {
                   <button className="absolute top-4 right-4 text-gray-400 hover:text-accent-dark" onClick={() => setSidebarOpen(false)}>
                     <X size={20} />
                   </button>
-                  <SidebarContent />
+                  <SidebarContent
+                    activeFilterCount={activeFilterCount}
+                    resetFilters={resetFilters}
+                    newOnly={newOnly}
+                    setNewOnly={setNewOnly}
+                    inStockOnly={inStockOnly}
+                    setInStockOnly={setInStockOnly}
+                    activeCategory={activeCategory}
+                    setActiveCategory={setActiveCategory}
+                    activeCat={activeCat}
+                    setActiveCat={setActiveCat}
+                    activeSection={activeSection}
+                    setActiveSection={setActiveSection}
+                    dbSections={dbSections}
+                    budgetPreset={budgetPreset}
+                    setBudgetPreset={setBudgetPreset}
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    minRating={minRating}
+                    setMinRating={setMinRating}
+                    allBrands={allBrands}
+                    activeBrands={activeBrands}
+                    toggleBrand={toggleBrand}
+                  />
                 </div>
               </div>
             </div>

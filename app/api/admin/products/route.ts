@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
     const newId = lastProduct ? lastProduct.id + 1 : 1;
     const product = await Product.create({ ...body, id: newId });
     return NextResponse.json(product, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ message: err.message }, { status: 500 });
+  } catch (err) {
+    console.error('Failed to create product:', err);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
