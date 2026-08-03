@@ -3,6 +3,8 @@ import Product from '@/lib/models/Product';
 import ProductForm from '@/components/admin/ProductForm';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   await connectDB();

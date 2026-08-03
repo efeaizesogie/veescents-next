@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${dmSans.variable} ${playfair.variable} scroll-smooth`}>
-        <body className="bg-cream-50 text-accent-dark font-sans selection:bg-accent-gold selection:text-white">
+      <html lang="en" className={`${dmSans.variable} ${playfair.variable} scroll-smooth`} suppressHydrationWarning>
+        <body className="bg-cream-50 text-accent-dark font-sans selection:bg-accent-gold selection:text-white" suppressHydrationWarning>
           <StoreProvider>
             <SiteShell>{children}</SiteShell>
           </StoreProvider>

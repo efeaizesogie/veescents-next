@@ -10,6 +10,8 @@ async function getCollections() {
   return Collection.find().sort({ order: 1 }).lean();
 }
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = { title: "Collections | Veescents" };
 
 export default async function CollectionsPage() {

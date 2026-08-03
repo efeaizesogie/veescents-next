@@ -3,6 +3,8 @@ import Collection from '@/lib/models/Collection';
 import CollectionForm from '@/components/admin/CollectionForm';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function EditCollectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await connectDB();

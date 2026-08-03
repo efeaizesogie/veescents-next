@@ -15,11 +15,8 @@ const NAV = [
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const SidebarContent = () => (
+function SidebarContent({ pathname, onClose }: { pathname: string; onClose: () => void }) {
+  return (
     <>
       <div className="px-6 py-8 border-b border-white/10">
         <Link href="/" className="font-serif text-2xl font-bold text-accent-gold block">Veescents</Link>
@@ -30,7 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {NAV.map(({ label, href, icon: Icon }) => {
           const active = pathname === href || (href !== '/admin' && pathname.startsWith(href));
           return (
-            <Link key={href} href={href} onClick={() => setSidebarOpen(false)}
+            <Link key={href} href={href} onClick={onClose}
               className={`flex items-center gap-3 px-4 py-3 rounded-sm text-sm font-medium transition-all ${active ? 'bg-accent-gold text-white' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
               <Icon size={18} />
               {label}
@@ -47,12 +44,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
     </>
   );
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-cream-50 flex">
       {/* Desktop sidebar */}
       <aside className="w-64 bg-accent-dark text-white flex-col fixed h-full z-40 hidden md:flex">
-        <SidebarContent />
+        <SidebarContent pathname={pathname} onClose={() => {}} />
       </aside>
 
       {/* Mobile sidebar overlay */}
@@ -61,12 +63,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
           <aside className="relative w-64 bg-accent-dark text-white flex flex-col h-full z-10">
             <button
-              onClick={() => setSidebarOpen(false)}
-              className="absolute top-4 right-4 text-white/60 hover:text-white"
+               onClick={() => setSidebarOpen(false)}
+               className="absolute top-4 right-4 text-white/60 hover:text-white"
             >
               <X size={20} />
             </button>
-            <SidebarContent />
+            <SidebarContent pathname={pathname} onClose={() => setSidebarOpen(false)} />
           </aside>
         </div>
       )}

@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import AnnouncementBar from '@/components/AnnouncementBar';
+
+export const dynamic = 'force-dynamic';
 import Hero from '@/components/Hero';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import FeaturedCategories from '@/components/FeaturedCategories';

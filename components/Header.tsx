@@ -24,12 +24,7 @@ const NAV_LINKS = [
     hasDropdown: false,
     dropdownItems: [],
   },
-  {
-    label: "Collections",
-    href: "/collections",
-    hasDropdown: false,
-    dropdownItems: [],
-  },
+
   {
     label: "Collections",
     href: "/collections",

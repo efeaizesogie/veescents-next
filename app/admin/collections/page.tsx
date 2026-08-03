@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Plus, Pencil } from 'lucide-react';
 import DeleteCollectionButton from '@/components/admin/DeleteCollectionButton';
 
+export const dynamic = 'force-dynamic';
+
 async function getCollections() {
   await connectDB();
   return Collection.find().sort({ order: 1 }).lean();
