@@ -3,12 +3,14 @@
 import React from 'react';
 import Image from 'next/image';
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 
 const EXCHANGE_RATE = 1;
 
 export default function CartPanel() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, cartTotal } = useStore();
+  const router = useRouter();
 
   return (
     <>
@@ -64,7 +66,13 @@ export default function CartPanel() {
               <span className="font-serif text-xl font-bold text-accent-dark">₦{(cartTotal * EXCHANGE_RATE).toLocaleString()}</span>
             </div>
             <p className="text-xs text-gray-400 mb-6 text-center">Shipping and taxes calculated at checkout.</p>
-            <button className="w-full bg-accent-dark text-white py-4 uppercase tracking-widest text-xs font-bold hover:bg-accent-gold transition-colors shadow-lg">
+            <button
+              onClick={() => {
+                setIsCartOpen(false);
+                router.push('/checkout');
+              }}
+              className="w-full bg-accent-dark text-white py-4 uppercase tracking-widest text-xs font-bold hover:bg-accent-gold transition-colors shadow-lg"
+            >
               Checkout
             </button>
           </div>

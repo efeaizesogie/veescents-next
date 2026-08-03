@@ -29,6 +29,7 @@ interface StoreContextType {
   recentSearches: string[];
   trackProductView: (productId: number) => void;
   trackSearch: (term: string) => void;
+  clearCart: () => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -196,6 +197,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setRecentSearches(prev => [normalized, ...prev.filter(t => t !== normalized)].slice(0, 20));
   }, []);
 
+  const clearCart = useCallback(() => {
+    setCart([]);
+  }, []);
+
   const cartTotal = cart.reduce((t, i) => t + i.price * i.quantity, 0);
   const cartCount = cart.reduce((t, i) => t + i.quantity, 0);
 
@@ -206,6 +211,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       toggleWishlist, isInWishlist, isCartOpen, setIsCartOpen,
       isWishlistOpen, setIsWishlistOpen, cartTotal, cartCount,
       recentlyViewedIds, recentSearches, trackProductView, trackSearch,
+      clearCart,
     }}>
       {children}
     </StoreContext.Provider>
