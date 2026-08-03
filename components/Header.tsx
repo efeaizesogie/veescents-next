@@ -159,7 +159,7 @@ export default function Header() {
               >
                 <Link
                   href={link.href}
-                  className="text-accent-dark hover:text-accent-gold text-sm font-medium transition-colors flex items-center gap-1 py-2 tracking-wide"
+                  className="text-accent-dark hover:text-accent-gold text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 py-2"
                 >
                   {link.label}
                   {link.hasDropdown && (
@@ -183,7 +183,7 @@ export default function Header() {
                             key={item.label}
                             href={item.href}
                             onClick={() => setActiveDropdown(null)}
-                            className="block px-4 py-2 text-sm text-gray-600 hover:bg-cream-100 hover:text-accent-gold transition-colors"
+                            className="block px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-[#3b3b3b] hover:bg-cream-50 hover:text-accent-gold transition-all"
                           >
                             {item.label}
                           </Link>

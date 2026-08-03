@@ -7,15 +7,15 @@ export default function Hero() {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           <div>
-            <span className="text-accent-gold font-semibold tracking-[0.2em] text-[11px] uppercase mb-3 block">
+            <span className="text-accent-gold font-bold tracking-[0.25em] text-xs uppercase mb-4 block">
               Veescents Fragrance Store
             </span>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-[3.3rem] leading-tight text-accent-dark">
-              Shop Original Perfumes
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-normal leading-tight text-accent-dark">
+              Shop <span className="font-serif italic font-normal text-accent-gold-dark">Original Perfumes</span>
               <br />
               For Every Budget
             </h1>
-            <p className="text-gray-600 mt-4 max-w-xl text-sm md:text-base leading-relaxed">
+            <p className="text-accent-dark/80 mt-5 max-w-xl text-[15px] md:text-[17px] font-light leading-relaxed">
               Discover top-rated designer, Arabian, and everyday fragrances with fast delivery and carefully curated picks.
             </p>
 
@@ -23,7 +23,7 @@ export default function Hero() {
               {['100% Authentic', 'Fast Delivery', 'Best Sellers Updated Daily'].map((item) => (
                 <span
                   key={item}
-                  className="text-[11px] uppercase tracking-widest bg-white border border-gray-200 px-3 py-2 text-gray-500"
+                  className="text-[10px] font-semibold uppercase tracking-widest bg-white border border-[#efece2] px-3.5 py-2.5 text-accent-dark/70 shadow-sm rounded-sm"
                 >
                   {item}
                 </span>
@@ -33,7 +33,7 @@ export default function Hero() {
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href="/store"
-                className="bg-accent-dark text-white px-7 py-3 text-xs font-bold uppercase tracking-widest hover:bg-accent-gold transition-colors"
+                className="bg-accent-dark text-white px-7 py-3 text-xs font-bold uppercase tracking-widest hover:bg-accent-gold transition-colors shadow-sm"
               >
                 Shop Now
               </Link>
@@ -45,18 +45,18 @@ export default function Hero() {
               </Link>
             </div>
 
-            <div className="mt-7 grid grid-cols-3 gap-4 max-w-md">
+            <div className="mt-8 grid grid-cols-3 gap-4 max-w-md">
               <div>
-                <p className="font-serif text-2xl text-accent-dark">2k+</p>
-                <p className="text-[11px] uppercase tracking-widest text-gray-400">Orders Served</p>
+                <p className="font-serif text-3xl font-normal text-accent-dark">2k+</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-accent-gray mt-1 block">Orders Served</p>
               </div>
               <div>
-                <p className="font-serif text-2xl text-accent-dark">150+</p>
-                <p className="text-[11px] uppercase tracking-widest text-gray-400">Product Picks</p>
+                <p className="font-serif text-3xl font-normal text-accent-dark">150+</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-accent-gray mt-1 block">Product Picks</p>
               </div>
               <div>
-                <p className="font-serif text-2xl text-accent-dark">4.8</p>
-                <p className="text-[11px] uppercase tracking-widest text-gray-400">Average Rating</p>
+                <p className="font-serif text-3xl font-normal text-accent-dark">4.8</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-accent-gray mt-1 block">Average Rating</p>
               </div>
             </div>
           </div>

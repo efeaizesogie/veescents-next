@@ -60,7 +60,7 @@ function FilterSection({ title, children, defaultOpen = true }: { title: string;
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between mb-3 group"
       >
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 group-hover:text-accent-gold transition-colors">{title}</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-accent-dark/85 group-hover:text-accent-gold transition-colors">{title}</p>
         {open ? <ChevronUp size={13} className="text-gray-300" /> : <ChevronDown size={13} className="text-gray-300" />}
       </button>
       {open && children}
@@ -142,7 +142,7 @@ function SidebarContent({
               >
                 {value && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
               </div>
-              <span className="text-sm text-gray-600">{label}</span>
+              <span className="text-sm text-accent-dark/75 font-semibold">{label}</span>
             </label>
           ))}
         </div>
@@ -153,7 +153,7 @@ function SidebarContent({
         <div className="space-y-1">
           {CATEGORIES.map(cat => (
             <button key={cat.value} onClick={() => setActiveCategory(cat.value)}
-              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors flex items-center justify-between ${activeCategory === cat.value ? 'bg-accent-dark text-white' : 'text-gray-600 hover:bg-cream-100'}`}>
+              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors flex items-center justify-between ${activeCategory === cat.value ? 'bg-accent-dark text-white font-semibold' : 'text-accent-dark/75 hover:bg-cream-100 hover:text-accent-gold font-medium'}`}>
               {cat.label}
               {activeCategory === cat.value && <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
             </button>
@@ -166,7 +166,7 @@ function SidebarContent({
         <div className="space-y-1">
           {CAT_TYPES.map(c => (
             <button key={c.value} onClick={() => setActiveCat(c.value)}
-              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors flex items-center justify-between ${activeCat === c.value ? 'bg-accent-dark text-white' : 'text-gray-600 hover:bg-cream-100'}`}>
+              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors flex items-center justify-between ${activeCat === c.value ? 'bg-accent-dark text-white font-semibold' : 'text-accent-dark/75 hover:bg-cream-100 hover:text-accent-gold font-medium'}`}>
               {c.label}
               {activeCat === c.value && <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
             </button>
@@ -179,7 +179,7 @@ function SidebarContent({
         <div className="space-y-1">
           {dbSections.map(sec => (
             <button key={sec.value} onClick={() => setActiveSection(sec.value)}
-              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors ${activeSection === sec.value ? 'bg-accent-dark text-white' : 'text-gray-600 hover:bg-cream-100'}`}>
+              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors ${activeSection === sec.value ? 'bg-accent-dark text-white font-semibold' : 'text-accent-dark/75 hover:bg-cream-100 hover:text-accent-gold font-medium'}`}>
               {sec.label}
             </button>
           ))}
@@ -191,7 +191,7 @@ function SidebarContent({
         <div className="space-y-1 mb-3">
           {BUDGET_PRESETS.map(({ label, max }) => (
             <button key={max} onClick={() => setBudgetPreset(budgetPreset === max ? null : max)}
-              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors flex items-center justify-between ${budgetPreset === max ? 'bg-accent-gold text-white' : 'text-gray-600 hover:bg-cream-100'}`}>
+              className={`w-full text-left text-sm px-3 py-1.5 rounded-sm transition-colors flex items-center justify-between ${budgetPreset === max ? 'bg-accent-gold text-white font-semibold' : 'text-accent-dark/75 hover:bg-cream-100 hover:text-accent-gold font-medium'}`}>
               {label}
               {budgetPreset === max && <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
             </button>
@@ -243,7 +243,7 @@ function SidebarContent({
                   className={`w-4 h-4 rounded-sm border flex-shrink-0 flex items-center justify-center transition-colors ${activeBrands.includes(brand) ? 'bg-accent-gold border-accent-gold' : 'border-gray-300 group-hover:border-accent-gold'}`}>
                   {activeBrands.includes(brand) && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                 </div>
-                <span className="text-sm text-gray-600 truncate">{brand}</span>
+                <span className="text-sm font-medium text-accent-dark/75 hover:text-accent-gold transition-colors truncate">{brand}</span>
               </label>
             ))}
           </div>

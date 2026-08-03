@@ -66,15 +66,15 @@ export default function ProductCard({ product }: { product: Product }) {
         ))}
       </div>
 
-      <h3 className="text-xs sm:text-sm font-medium text-accent-dark mb-0.5 group-hover:text-accent-gold transition-colors text-center line-clamp-2 leading-snug px-1">
-        {product.name}
-      </h3>
-      <p className="text-gray-400 text-[10px] uppercase tracking-wide mb-1.5">
+      <p className="text-accent-gold-dark text-[10px] font-bold uppercase tracking-widest mb-1">
         {product.brand}
       </p>
+      <h3 className="text-xs sm:text-sm font-serif font-normal text-accent-dark mb-1.5 group-hover:text-accent-gold transition-colors text-center line-clamp-2 leading-snug px-1">
+        {product.name}
+      </h3>
 
       <div className="flex flex-col items-center gap-1.5">
-        <span className="text-accent-gold font-semibold text-sm">
+        <span className="text-accent-dark font-bold text-sm sm:text-base mt-0.5">
           ₦{(product.price * EXCHANGE_RATE).toLocaleString()}
         </span>
         <button
