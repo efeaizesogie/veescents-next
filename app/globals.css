@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-dm-sans), sans-serif;
-  --font-serif: var(--font-playfair), serif;
+  --font-sans: var(--font-jost), sans-serif;
+  --font-serif: var(--font-jost), sans-serif;
 
   --color-cream-50: #fdfcf8;
   --color-cream-100: #f9f7f0;
@@ -25,6 +25,10 @@
       transform: translateY(0);
     }
   }
+}
+
+html, body, button, input, select, textarea, a, p, span, h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-jost), sans-serif;
 }
 
 html {

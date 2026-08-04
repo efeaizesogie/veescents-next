@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Playfair_Display } from 'next/font/google';
+import { Jost } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { StoreProvider } from '@/context/StoreContext';
 import SiteShell from '@/components/SiteShell';
 
-const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans' });
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', style: ['normal', 'italic'] });
+const jost = Jost({ subsets: ['latin'], variable: '--font-jost' });
 
 export const metadata: Metadata = {
   title: 'Veescents | Luxury Perfumes',
@@ -15,9 +14,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={`${dmSans.variable} ${playfair.variable} scroll-smooth`} suppressHydrationWarning>
-        <body className="bg-cream-50 text-accent-dark font-sans selection:bg-accent-gold selection:text-white" suppressHydrationWarning>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          fontFamily: 'var(--font-jost), sans-serif',
+        },
+      }}
+    >
+      <html lang="en" className={`${jost.variable} scroll-smooth`} suppressHydrationWarning>
+        <body className={`${jost.className} bg-cream-50 text-accent-dark font-sans selection:bg-accent-gold selection:text-white`} suppressHydrationWarning>
           <StoreProvider>
             <SiteShell>{children}</SiteShell>
           </StoreProvider>

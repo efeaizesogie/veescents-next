@@ -13,13 +13,18 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/checkout(.*)',
-  '/api/user/orders(.*)'
+  '/api/user/orders(.*)',
+  '/api/user/cart',
+  '/api/user/wishlist'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     const { userId } = await auth();
     if (!userId) {
+      if (req.nextUrl.pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
       return NextResponse.redirect(new URL('/sign-in', req.url));
     }
 
@@ -28,6 +33,9 @@ export default clerkMiddleware(async (auth, req) => {
     if (isAdminRoute(req)) {
       const adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim());
       if (!adminIds.includes(userId)) {
+        if (req.nextUrl.pathname.startsWith('/api/')) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
         return NextResponse.redirect(new URL('/', req.url));
       }
     }

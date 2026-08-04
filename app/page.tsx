@@ -17,7 +17,7 @@ export default function HomePage() {
     <>
       <AnnouncementBar />
       <Hero />
-      <WhyChooseUs />
+      {/* <WhyChooseUs /> */}
       <Suspense fallback={<div className="py-20 bg-white" />}>
         <FeaturedCategories />
       </Suspense>

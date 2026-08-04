@@ -69,7 +69,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <p className="text-accent-gold-dark text-[10px] font-bold uppercase tracking-widest mb-1">
         {product.brand}
       </p>
-      <h3 className="text-xs sm:text-sm font-serif font-normal text-accent-dark mb-1.5 group-hover:text-accent-gold transition-colors text-center line-clamp-2 leading-snug px-1">
+      <h3 className="text-xs sm:text-base font-serif font-semibold text-accent-dark mb-1.5 group-hover:text-accent-gold transition-colors text-center line-clamp-2 leading-snug px-1">
         {product.name}
       </h3>
 

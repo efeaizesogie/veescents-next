@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"DM Sans"', 'sans-serif'],
-        serif: ['"Playfair Display"', 'serif'],
+        sans: ['"Jost"', 'sans-serif'],
+        serif: ['"Jost"', 'sans-serif'],
       },
       colors: {
         cream: {
